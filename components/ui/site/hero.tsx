@@ -2,6 +2,7 @@ import { ArrowDown } from "lucide-react";
 
 import { Navbar } from "./navbar";
 import { HeroImage } from "./hero-image";
+import { Reveal } from "@/components/misc/reveal";
 
 export function Hero() {
   return (
@@ -12,39 +13,70 @@ export function Hero() {
       <div className="relative z-10 mx-auto flex max-w-[1440px] flex-col px-6 sm:px-10 lg:px-16">
         <Navbar />
 
-        {/* Increased bottom padding (pb-40, lg:pb-48) to leave space for the absolute button */}
         <div className="grid flex-1 items-center gap-12 pb-40 pt-20 lg:min-h-[calc(100vh-80px)] lg:grid-cols-[0.95fr_1.05fr] lg:gap-16 lg:pb-48 lg:pt-12">
+
           {/* Text */}
           <div className="relative z-10">
-            <p className="mb-8 flex items-center gap-3 text-[10px] uppercase tracking-[0.26em] text-accent">
-              <span className="h-px w-8 bg-accent" />
-              A quieter way forward
-            </p>
 
-            <h1 className="max-w-3xl font-serif text-[clamp(4rem,8vw,8.5rem)] leading-[0.84] tracking-[-0.065em] text-balance">
-              Come back
-              <br />
-              <em className="font-light text-accent">to yourself.</em>
-            </h1>
-
-            {/* Removed the flex layout here so the paragraph just sits cleanly by itself */}
-            <div className="mt-12">
-              <p className="max-w-sm text-base leading-7 text-primary-foreground/65">
-                Life coaching for the in-between seasons — when the old way no
-                longer fits, and the next chapter is asking to be lived.
+            {/* Eyebrow */}
+            <Reveal
+              y={14}
+              delay={0.1}
+            >
+              <p className="mb-8 flex items-center gap-3 text-xs uppercase tracking-[0.26em] text-accent">
+                <span className="h-px w-8 bg-accent" />
+                A quieter way forward
               </p>
-            </div>
+            </Reveal>
+
+            {/* Heading */}
+            <Reveal
+              y={32}
+              delay={0.2}
+            >
+              <h1 className="max-w-3xl font-serif text-[clamp(4rem,8vw,8.5rem)] leading-[0.84] tracking-[-0.065em] text-balance">
+                Come back
+                <br />
+                <em className="font-light text-accent">
+                  to yourself.
+                </em>
+              </h1>
+            </Reveal>
+
+            {/* Description */}
+            <Reveal
+              y={20}
+              delay={0.4}
+            >
+              <div className="mt-12">
+                <p className="max-w-sm text-base leading-7 text-primary-foreground/65">
+                  Life coaching for the in-between seasons — when the old way
+                  no longer fits, and the next chapter is asking to be lived.
+                </p>
+              </div>
+            </Reveal>
+
           </div>
 
           {/* Desktop image composition */}
-          <div className="flex items-center justify-end">
+          <Reveal
+            x={40}
+            y={0}
+            scale={0.96}
+            delay={0.25}
+            className="flex items-center justify-end"
+          >
             <HeroImage />
-          </div>
+          </Reveal>
         </div>
       </div>
 
       {/* Centered "Begin here" Button */}
-      <div className="absolute bottom-32 left-1/2 z-20 flex -translate-x-1/2 items-center justify-center sm:bottom-40">
+      <Reveal
+        y={18}
+        delay={0.7}
+        className="absolute bottom-32 left-1/2 z-20 flex -translate-x-1/2 items-center justify-center sm:bottom-40"
+      >
         <a
           href="#approach"
           className="group flex items-center gap-4 text-xs uppercase tracking-[0.2em] text-accent"
@@ -52,9 +84,10 @@ export function Hero() {
           <span className="flex h-12 w-12 items-center justify-center rounded-full border border-accent transition-colors group-hover:bg-accent group-hover:text-primary">
             <ArrowDown size={16} />
           </span>
+
           Begin here
         </a>
-      </div>
+      </Reveal>
 
       {/* Bottom transition */}
       <div className="pointer-events-none absolute bottom-[-1px] left-0 right-0 h-24 overflow-hidden sm:h-36">

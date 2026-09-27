@@ -14,14 +14,25 @@ export function Navbar() {
 
   return (
     <header className="relative z-20 flex items-center justify-between border-b border-primary-foreground/20 py-6">
+      
+      {/* Logo */}
       <a
         href="#top"
-        className="font-serif text-xl tracking-[-0.04em]"
+        className="flex items-center font-serif text-xl tracking-[-0.04em]"
         aria-label="Damastery home"
       >
-        damastery<span className="text-accent">.</span>
+        <img
+          src="/images/logo-white.png"
+          alt="Damastery logo"
+          className="mr-2 block h-9 w-9 object-contain"
+        />
+
+        <span>
+          damastery<span className="text-accent">.</span>
+        </span>
       </a>
 
+      {/* Desktop navigation */}
       <nav
         className="hidden items-center gap-10 md:flex"
         aria-label="Main navigation"
@@ -37,6 +48,7 @@ export function Navbar() {
         ))}
       </nav>
 
+      {/* Desktop CTA */}
       <a
         href="#contact"
         className="hidden items-center gap-2 text-xs uppercase tracking-[0.18em] text-primary-foreground md:flex"
@@ -45,6 +57,7 @@ export function Navbar() {
         <ArrowUpRight size={15} strokeWidth={1.5} />
       </a>
 
+      {/* Mobile menu button */}
       <button
         type="button"
         className="md:hidden"
@@ -55,6 +68,7 @@ export function Navbar() {
         {menuOpen ? <X size={22} /> : <Menu size={22} />}
       </button>
 
+      {/* Mobile navigation */}
       {menuOpen && (
         <nav
           className="absolute left-0 right-0 top-[73px] z-30 flex flex-col gap-5 bg-primary px-6 py-6 md:hidden"
