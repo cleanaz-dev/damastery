@@ -20,8 +20,8 @@ export const auth = betterAuth({
       "localhost:3000",
       "lvh.me:3000",
       "*.lvh.me:3000",
-      "brett-photo.vercel.app",
-      "*.brett-photo.vercel.app",
+      "damastery.com",
+      "*.damastery.com",
     ],
     fallback: "http://localhost:3000",
   },
@@ -29,8 +29,8 @@ export const auth = betterAuth({
     "http://localhost:3000",
     "http://lvh.me:3000",
     "http://admin.lvh.me:3000",
-    "https://admin.brett-photo.vercel.app",
-    "https://*.brett-photo.vercel.app",
+    "https://admin.damastery.com",
+    "https://*.damastery.com",
   ],
 
   advanced: {
@@ -38,7 +38,7 @@ export const auth = betterAuth({
       enabled: true,
       domain:
         process.env.NODE_ENV === "production"
-          ? ".brett-photo.vercel.app"
+          ? ".damastery.com"
           : ".lvh.me",
     },
     useSecureCookies: process.env.NODE_ENV === "production",
