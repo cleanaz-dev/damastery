@@ -5,7 +5,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { admin as adminPlugin } from "better-auth/plugins";
 import { ac, admin, customer } from "./permissions";
-import { PrismaClient, UserRole } from "./generated/prisma/client";
+import { PrismaClient, UserRole } from "@/lib/generated/prisma/client";
 
 
 const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! });
