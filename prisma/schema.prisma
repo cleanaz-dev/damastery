@@ -17,6 +17,12 @@ enum UserRole {
   ADMIN
 }
 
+enum BookingStatus {
+  BOOKED
+  PENDING
+  CANCELLED
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String
@@ -27,8 +33,18 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  // Custom fields from your auth config
+  avatarUrl     String?
+  phone         String?
+
+  // Admin plugin fields
+  banned        Boolean?  @default(false)
+  banReason     String?
+  banExpires    DateTime?
+
   sessions Session[]
   accounts Account[]
+  bookings Booking[]
 }
 
 model Session {
@@ -40,6 +56,9 @@ model Session {
   userAgent String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Admin plugin field (used for impersonation)
+  impersonatedBy String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -71,3 +90,25 @@ model Verification {
   updatedAt  DateTime @updatedAt
 }
 
+model Provider {
+  id              String @id @default(cuid())
+  name            String // e.g., "Dr. Smith" or "Room 1"
+  hapioResourceId String @unique // Maps to Hapio's Resource ID
+  // Note: We don't store Location/Service here if there's only 1 for the whole app.
+  // Just put the new Location/Service IDs in your .env file once generated!
+}
+
+model Booking {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  hapioBookingId String @unique // Allows you to cancel/confirm in Hapio
+
+  status BookingStatus @default(PENDING)
+
+  startsAt DateTime
+  endsAt   DateTime
+
+  adminNote String? // For your admin blocks
+}
