@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { runHapioSetup } from "./actions";
 
-
 export default function HapioSetupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +18,6 @@ export default function HapioSetupPage() {
     setError(null);
 
     const formData = new FormData(e.currentTarget);
-    
     const response = await runHapioSetup(formData);
     
     if (response.success && response.data) {
@@ -32,47 +30,91 @@ export default function HapioSetupPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 md:p-10">
+    <div className="max-w-3xl mx-auto p-6 md:p-10">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Hapio Initial Setup</h1>
         <p className="text-gray-600">
-          Run this once to generate the base Location, Service, and Resource for your new Hapio environment.
+          Configure your business rules and generate your environment.
         </p>
       </div>
 
       {!result ? (
-        <form onSubmit={handleSubmit} className="bg-white border shadow-sm rounded-xl p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Location Name</label>
-            <input 
-              name="locationName" 
-              type="text" 
-              defaultValue="Main Office"
-              required 
-              className="w-full border-gray-300 rounded-lg shadow-sm px-4 py-2 border focus:ring-blue-500 focus:border-blue-500"
-            />
+        <form onSubmit={handleSubmit} className="bg-white border shadow-sm rounded-xl p-6 space-y-6">
+          {/* BASIC INFO */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Location Name</label>
+              <input name="locationName" type="text" defaultValue="Main Office" required className="w-full border-gray-300 rounded-lg shadow-sm px-4 py-2 border focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Service Name</label>
+              <input name="serviceName" type="text" defaultValue="Standard Booking" required className="w-full border-gray-300 rounded-lg shadow-sm px-4 py-2 border focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Admin Worker Name</label>
+              <input name="resourceName" type="text" defaultValue="Admin Worker" required className="w-full border-gray-300 rounded-lg shadow-sm px-4 py-2 border focus:ring-blue-500 focus:border-blue-500" />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Service Name</label>
-            <input 
-              name="serviceName" 
-              type="text" 
-              defaultValue="Standard Booking"
-              required 
-              className="w-full border-gray-300 rounded-lg shadow-sm px-4 py-2 border focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
+          <hr className="border-gray-200" />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Admin Resource Name</label>
-            <input 
-              name="resourceName" 
-              type="text" 
-              defaultValue="Admin Worker"
-              required 
-              className="w-full border-gray-300 rounded-lg shadow-sm px-4 py-2 border focus:ring-blue-500 focus:border-blue-500"
-            />
+          {/* SERVICE SETTINGS (HAPIO ISO DURATIONS) */}
+          <h2 className="text-lg font-bold text-gray-800">Booking Rules</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Appointment Length</label>
+              <select name="duration" className="w-full border-gray-300 rounded-lg shadow-sm px-4 py-2 border bg-white focus:ring-blue-500 focus:border-blue-500">
+                <option value="PT15M">15 Minutes</option>
+                <option value="PT30M">30 Minutes</option>
+                <option value="PT45M">45 Minutes</option>
+                <option value="PT1H" selected>1 Hour</option>
+                <option value="PT1H30M">1.5 Hours</option>
+                <option value="PT2H">2 Hours</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Available Slots frequency</label>
+              <select name="interval" className="w-full border-gray-300 rounded-lg shadow-sm px-4 py-2 border bg-white focus:ring-blue-500 focus:border-blue-500">
+                <option value="PT15M">Every 15 mins (9:00, 9:15...)</option>
+                <option value="PT30M" selected>Every 30 mins (9:00, 9:30...)</option>
+                <option value="PT1H">Every Hour (9:00, 10:00...)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Buffer / Clean-up Time (After)</label>
+              <select name="buffer" className="w-full border-gray-300 rounded-lg shadow-sm px-4 py-2 border bg-white focus:ring-blue-500 focus:border-blue-500">
+                <option value="PT0M" selected>None</option>
+                <option value="PT5M">5 Minutes</option>
+                <option value="PT10M">10 Minutes</option>
+                <option value="PT15M">15 Minutes</option>
+                <option value="PT30M">30 Minutes</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Required Advance Notice</label>
+              <select name="advanceNotice" className="w-full border-gray-300 rounded-lg shadow-sm px-4 py-2 border bg-white focus:ring-blue-500 focus:border-blue-500">
+                <option value="PT0H">No notice (Immediate)</option>
+                <option value="PT2H" selected>2 Hours before</option>
+                <option value="PT12H">12 Hours before</option>
+                <option value="PT24H">24 Hours before</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">How far out can they book?</label>
+              <select name="futureLimit" className="w-full border-gray-300 rounded-lg shadow-sm px-4 py-2 border bg-white focus:ring-blue-500 focus:border-blue-500">
+                <option value="P7D">7 Days out</option>
+                <option value="P14D">14 Days out</option>
+                <option value="P30D" selected>30 Days out</option>
+                <option value="P60D">60 Days out</option>
+                <option value="P90D">90 Days out</option>
+              </select>
+            </div>
+
           </div>
 
           {error && <div className="text-red-600 text-sm bg-red-50 p-3 rounded">{error}</div>}
@@ -108,10 +150,6 @@ export default function HapioSetupPage() {
               </pre>
             </div>
           </div>
-          
-          <p className="mt-6 text-sm text-green-700">
-            Once you've updated your code, you can safely ignore or delete this setup page!
-          </p>
         </div>
       )}
     </div>

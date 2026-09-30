@@ -152,34 +152,45 @@ export async function createCustomerBooking(params: {
 }
 
 
-export async function setupHapioProject(clinicName: string, serviceName: string, adminName: string) {
+export async function setupHapioProject(
+  clinicName: string, 
+  serviceName: string, 
+  adminName: string,
+  settings: {
+    duration: string;
+    bookableInterval: string;
+    bufferAfter: string;
+    advanceNotice: string;
+    futureLimit: string;
+  }
+) {
   // 1. Create Location
   const location = await hapioFetch<{ id: string }>(`/locations`, {
     method: "POST",
     body: JSON.stringify({
       name: clinicName,
-      time_zone: "America/Toronto", // Change to your timezone
+      time_zone: "America/Toronto", 
       resource_selection_strategy: "equalize",
       enabled: true
     })
   });
 
-  // 2. Create Service
+  // 2. Create Service (NOW 100% DYNAMIC FROM FRONTEND)
   const service = await hapioFetch<{ id: string }>(`/services`, {
     method: "POST",
     body: JSON.stringify({
       name: serviceName,
       type: "fixed",
-      duration: "PT1H", // 1 Hour (ISO 8601 duration)
-      bookable_interval: "PT30M", // Start slots every 30 mins
-      buffer_time_after: "PT0M",
-      booking_window_start: "PT2H",
-      booking_window_end: "P30D", // Can book up to 30 days out
+      duration: settings.duration,
+      bookable_interval: settings.bookableInterval, 
+      buffer_time_after: settings.bufferAfter,
+      booking_window_start: settings.advanceNotice,
+      booking_window_end: settings.futureLimit,
       enabled: true
     })
   });
 
-  // 3. Create Resource (The Admin)
+  // 3. Create Resource
   const resource = await hapioFetch<{ id: string }>(`/resources`, {
     method: "POST",
     body: JSON.stringify({
