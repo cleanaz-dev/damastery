@@ -3,6 +3,7 @@ import { Settings, Users, LayoutDashboard, Calendar, Box, Newspaper } from "luci
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter, // add
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -13,6 +14,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
+import { NavUser } from "./ nav-user";
 const navItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
   { title: "Clients", url: "/admin/clients", icon: Users },
@@ -61,6 +63,10 @@ export function AdminSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter className="p-2">
+        <NavUser />
+      </SidebarFooter>
 
       <SidebarRail />
     </Sidebar>
