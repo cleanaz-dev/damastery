@@ -30,7 +30,7 @@ export default function SignInPage() {
       setError(error.message ?? "Something went wrong");
       return;
     }
-    router.push("/admin");
+    router.push("/auth/redirect");
   }
 
   return (

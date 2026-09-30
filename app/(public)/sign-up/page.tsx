@@ -24,14 +24,18 @@ export default function SignUpPage() {
     setError(null);
     setLoading(true);
 
-    const { error } = await authClient.signUp.email({ name, email, password });
+    const { data, error } = await authClient.signUp.email({
+      name,
+      email,
+      password,
+    });
 
     setLoading(false);
-    if (error) {
-      setError(error.message ?? "Something went wrong");
+    if (error || !data) {
+      setError(error?.message ?? "Something went wrong");
       return;
     }
-    router.push("/dashboard");
+    router.push(`/client/${data.user.id}`);
   }
 
   return (
