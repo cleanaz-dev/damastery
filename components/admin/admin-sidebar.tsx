@@ -20,8 +20,7 @@ const navItems = [
   { title: "Clients", url: "/admin/clients", icon: Users },
   { title: "Schedule", url: "/admin/schedule", icon: Calendar },
   { title: "Products", url: "/admin/products", icon: Box },
-  { title: "Blogs", url: "/admin/blogs", icon: Newspaper },
-  { title: "Settings", url: "/admin/settings", icon: Settings },
+  { title: "Blogs", url: "/admin/blogs", icon: Newspaper }
 ];
 
 export function AdminSidebar() {
