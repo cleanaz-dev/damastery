@@ -91,9 +91,10 @@ export default function HapioSetupPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Future Limit</label>
               <select name="futureLimit" defaultValue="P30D" className="w-full border-gray-300 rounded-lg shadow-sm px-4 py-2 border bg-white focus:ring-blue-500 focus:border-blue-500">
+                <option value="P7D">7 Days out</option>
+                <option value="P10D">10 Days out</option>
                 <option value="P14D">14 Days out</option>
                 <option value="P30D">30 Days out</option>
-                <option value="P90D">90 Days out</option>
               </select>
             </div>
           </div>
