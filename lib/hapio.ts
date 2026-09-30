@@ -211,3 +211,19 @@ export async function setupHapioProject(
     resourceId: resource.id
   };
 }
+
+export async function getHapioBookings(params: {
+  resourceId: string;
+  from: string; // ISO string 
+  to: string;   // ISO string
+}) {
+  const query = new URLSearchParams({
+    location_id: HAPIO_LOCATION_ID,
+    resource_id: params.resourceId,
+    from: params.from,
+    to: params.to,
+  });
+
+  // Returns all bookings. Admin blocks will have `metadata.is_admin_block: true`
+  return hapioFetch<{ data: any[] }>(`/bookings?${query.toString()}`);
+}

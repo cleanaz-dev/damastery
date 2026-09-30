@@ -1,3 +1,4 @@
+// app/(auth)/admin/schedule/setup/page.tsx
 "use client";
 
 import { useState } from "react";
