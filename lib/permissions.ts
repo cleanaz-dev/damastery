@@ -17,6 +17,6 @@ export const admin = ac.newRole({
 });
 
 // Regular customer: no admin-plugin permissions
-export const customer = ac.newRole({
+export const client = ac.newRole({
   ...userAc.statements,
 });

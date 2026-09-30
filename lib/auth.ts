@@ -4,7 +4,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { admin as adminPlugin } from "better-auth/plugins";
-import { ac, admin, customer } from "./permissions";
+import { ac, admin, client } from "./permissions";
 import { PrismaClient, UserRole } from "@/lib/generated/prisma/client";
 
 
@@ -64,7 +64,7 @@ export const auth = betterAuth({
     additionalFields: {
       role: {
         type: "string",
-        defaultValue: UserRole.CUSTOMER,
+        defaultValue: UserRole.CLIENT,
         input: false,
       },
       phone: {
@@ -76,11 +76,11 @@ export const auth = betterAuth({
   plugins: [
     dash(),
     adminPlugin({
-      defaultRole: UserRole.CUSTOMER,
+      defaultRole: UserRole.CLIENT,
       ac,
       roles: {
         ADMIN: admin,
-        CUSTOMER: customer,
+        CLIENT: client,
       },
     }),
   ],
