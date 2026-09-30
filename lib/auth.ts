@@ -7,7 +7,6 @@ import { admin as adminPlugin } from "better-auth/plugins";
 import { ac, admin, client } from "./permissions";
 import { PrismaClient, UserRole } from "@/lib/generated/prisma/client";
 
-
 const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
 
@@ -49,18 +48,24 @@ export const auth = betterAuth({
     enabled: true,
   },
 
-  // ADD THIS BLOCK
+  account: {
+    accountLinking: {
+      enabled: true,
+      updateUserInfoOnLink: true, // fills the picture when Google links to the seeded user
+    },
+  },
+
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      overrideUserInfoOnSignIn: true, // add this
+      overrideUserInfoOnSignIn: true,
     },
   },
 
   user: {
     fields: {
-      image: "avatarUrl", // map Better Auth's "image" to your "avatarUrl" column
+      image: "avatarUrl", // Better Auth's "image" maps to your "avatarUrl" column
     },
     additionalFields: {
       role: {
@@ -74,11 +79,12 @@ export const auth = betterAuth({
       },
     },
   },
+
   plugins: [
     dash(),
     adminPlugin({
       defaultRole: UserRole.CLIENT,
-      adminRoles: [UserRole.ADMIN], // add this
+      adminRoles: [UserRole.ADMIN],
       ac,
       roles: {
         ADMIN: admin,
