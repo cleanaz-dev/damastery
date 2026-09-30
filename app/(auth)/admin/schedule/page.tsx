@@ -1,18 +1,32 @@
-// app/(auth)/admin/schedule/page.tsx
 import AdminTimeBlocker from "@/components/admin/admin-time-blocker";
 import { getHapioBookings } from "@/lib/hapio";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma"; // <-- Make sure this points to your instantiated Prisma client
 
 export default async function AdminSchedulePage() {
-  // Replace this with how you retrieve the resource ID (e.g., from DB or env)
-  // that was generated in your setup page!
-  const ADMIN_RESOURCE_ID = "YOUR_SAVED_RESOURCE_ID"; 
+  // 1. Fetch the provider and their Hapio Resource ID from your DB
+  const provider = await prisma.provider.findFirst();
 
-  // Fetch upcoming bookings for the next 7 days
+  // 2. Handle the state where setup hasn't been run yet
+  if (!provider || !provider.hapioResourceId) {
+    return (
+      <div className="max-w-5xl mx-auto p-10 text-center space-y-4">
+        <h1 className="text-2xl font-bold">Setup Required</h1>
+        <p className="text-gray-600">You haven't linked a Hapio resource yet.</p>
+        <Link href="/admin/schedule/setup" className="text-blue-600 hover:underline">
+          Go to Setup
+        </Link>
+      </div>
+    );
+  }
+
+  const ADMIN_RESOURCE_ID = provider.hapioResourceId;
+
   const today = new Date();
   const nextWeek = new Date();
   nextWeek.setDate(today.getDate() + 7);
 
+  // 3. Fetch the bookings using the DB-provided ID
   const response = await getHapioBookings({
     resourceId: ADMIN_RESOURCE_ID,
     from: today.toISOString(),
@@ -26,17 +40,17 @@ export default async function AdminSchedulePage() {
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Schedule Management</h1>
-          <p className="text-gray-600">Manage your availability and view upcoming appointments.</p>
+          <p className="text-gray-600">Block your availability for {provider.name}.</p>
         </div>
         <Link href="/admin/schedule/setup" className="text-sm text-blue-600 hover:underline">
-          Go to Setup &rarr;
+          Go to Settings &rarr;
         </Link>
       </div>
 
-      {/* Top: The Time Blocker Form */}
+      {/* DND Blocker Form */}
       <AdminTimeBlocker resourceId={ADMIN_RESOURCE_ID} />
 
-      {/* Bottom: List of existing bookings / blocked time */}
+      {/* List of Upcoming Events */}
       <div className="bg-white border shadow-sm rounded-xl p-6">
         <h2 className="text-lg font-bold text-gray-800 mb-4">Upcoming Schedule (Next 7 Days)</h2>
         
@@ -46,22 +60,24 @@ export default async function AdminSchedulePage() {
           <div className="space-y-3">
             {bookings.map((booking: any) => {
               const isAdminBlock = booking.metadata?.is_admin_block;
-              const startDate = new Date(booking.starts_at).toLocaleString();
-              const endDate = new Date(booking.ends_at).toLocaleTimeString();
+              
+              // Formatting dates specifically for Toronto Time for display
+              const startDate = new Date(booking.starts_at).toLocaleString('en-US', { timeZone: "America/Toronto" });
+              const endDate = new Date(booking.ends_at).toLocaleTimeString('en-US', { timeZone: "America/Toronto" });
 
               return (
                 <div 
                   key={booking.id} 
                   className={`p-4 rounded-lg border ${
                     isAdminBlock 
-                      ? "bg-gray-50 border-gray-200 border-l-4 border-l-gray-500" // Grey for blocked time
-                      : "bg-blue-50 border-blue-200 border-l-4 border-l-blue-500" // Blue for client appointments
+                      ? "bg-gray-50 border-gray-200 border-l-4 border-l-gray-500" 
+                      : "bg-blue-50 border-blue-200 border-l-4 border-l-blue-500"
                   }`}
                 >
                   <div className="flex justify-between items-center">
                     <div>
                       <p className="font-semibold text-gray-900">
-                        {isAdminBlock ? `Admin Block: ${booking.metadata.category}` : "Client Appointment"}
+                        {isAdminBlock ? `Admin Block (${booking.metadata.category})` : "Client Appointment"}
                       </p>
                       <p className="text-sm text-gray-600">
                         {startDate} - {endDate}

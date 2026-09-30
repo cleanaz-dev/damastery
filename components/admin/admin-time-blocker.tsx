@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { addAdminBlock } from "@/app/(auth)/admin/schedule/setup/actions";
+import { addAdminBlock } from "@/app/(auth)/admin/schedule/actions";
 
 export default function AdminTimeBlocker({ resourceId }: { resourceId: string }) {
   const [loading, setLoading] = useState(false);
