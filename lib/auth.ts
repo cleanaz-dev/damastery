@@ -78,6 +78,7 @@ export const auth = betterAuth({
     dash(),
     adminPlugin({
       defaultRole: UserRole.CLIENT,
+      adminRoles: [UserRole.ADMIN], // add this
       ac,
       roles: {
         ADMIN: admin,
