@@ -32,7 +32,11 @@ export function AdminSidebar() {
     >
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-2 font-serif text-lg">
-          <span className="h-6 w-6 shrink-0 rounded-sm bg-accent" />
+          <img
+            src="/images/logo-white.png"
+            className="size-4 object-contain"
+            alt="damastery-logo"
+          />
           <span className="group-data-[collapsible=icon]:hidden">
             Damastery
           </span>
