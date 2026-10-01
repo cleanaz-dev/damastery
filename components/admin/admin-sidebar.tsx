@@ -30,11 +30,11 @@ export function AdminSidebar() {
       collapsible="icon"
       className="border-none bg-primary text-primary-foreground"
     >
-      <SidebarHeader className="p-4">
+      <SidebarHeader className="p-2">
         <div className="flex items-center gap-2 font-serif text-lg">
           <img
             src="/images/logo-white.png"
-            className="size-4 object-contain"
+            className="size-10 object-contain"
             alt="damastery-logo"
           />
           <span className="group-data-[collapsible=icon]:hidden">
