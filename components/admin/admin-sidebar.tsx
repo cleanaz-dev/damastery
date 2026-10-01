@@ -38,7 +38,7 @@ export function AdminSidebar() {
             alt="damastery-logo"
           />
           <span className="group-data-[collapsible=icon]:hidden">
-            Damastery
+            damastery.
           </span>
         </div>
       </SidebarHeader>
