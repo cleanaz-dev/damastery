@@ -3,7 +3,13 @@
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 
-export function GoogleButton({ label }: { label: string }) {
+export function GoogleButton({
+  label,
+  callbackURL = "/auth/redirect",
+}: {
+  label: string;
+  callbackURL?: string;
+}) {
   return (
     <Button
       type="button"
@@ -12,7 +18,9 @@ export function GoogleButton({ label }: { label: string }) {
       onClick={() =>
         authClient.signIn.social({
           provider: "google",
-          callbackURL: "/dashboard",
+          callbackURL,
+          newUserCallbackURL: callbackURL,
+          errorCallbackURL: "/sign-in",
         })
       }
     >
