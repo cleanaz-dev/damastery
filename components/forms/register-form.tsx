@@ -4,7 +4,6 @@ import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { Loader2 } from "lucide-react";
 
-// Assuming you have these shadcn components generated in your project
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,11 +26,9 @@ export function RegisterForm({ token, defaults }: Props) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   
-  // Loading states
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  // after signup, they land back on the form page
   const callbackURL = `/client/form/${token}`;
 
   async function handleGoogle() {
@@ -68,106 +65,103 @@ export function RegisterForm({ token, defaults }: Props) {
   }
 
   return (
-    <Card className="mx-auto w-full max-w-md shadow-sm">
-      <CardHeader className="space-y-2 text-center">
-        <CardTitle className="text-2xl font-semibold tracking-tight">
-          Hi {defaults.name.split(" ")[0]}, create your account
-        </CardTitle>
-        <CardDescription className="text-muted-foreground">
-          Choose your preferred method to sign up
-        </CardDescription>
-      </CardHeader>
-      
-      <CardContent className="space-y-6">
-        {/* Google OAuth Button */}
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full font-normal"
-          onClick={handleGoogle}
-          disabled={isLoading || isGoogleLoading}
-        >
-          {isGoogleLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <GoogleIcon />
-          )}
-          Continue with Google
-        </Button>
-
-        {/* Fancy Divider */}
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-              Or continue with email
-            </span>
-          </div>
-        </div>
-
-        {/* Email/Password Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="John Doe"
-              disabled={isLoading || isGoogleLoading}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@example.com"
-              disabled={isLoading || isGoogleLoading}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              disabled={isLoading || isGoogleLoading}
-              required
-            />
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <p className="text-sm font-medium text-destructive">{error}</p>
-          )}
-
-          {/* Submit Button */}
-          <Button 
-            type="submit" 
-            className="w-full" 
+    // THIS WRAPPER IS WHAT CENTERS IT ON THE SCREEN
+    <div className="flex min-h-screen w-full items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-sm">
+        <CardHeader className="space-y-2 text-center">
+          <CardTitle className="text-2xl font-semibold tracking-tight">
+            Hi {defaults.name.split(" ")[0]}, create your account
+          </CardTitle>
+          <CardDescription className="text-muted-foreground">
+            Choose your preferred method to sign up
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent className="space-y-6">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full font-normal"
+            onClick={handleGoogle}
             disabled={isLoading || isGoogleLoading}
           >
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Create account
+            {isGoogleLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <GoogleIcon />
+            )}
+            Continue with Google
           </Button>
-        </form>
-      </CardContent>
-    </Card>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or continue with email
+              </span>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="John Doe"
+                disabled={isLoading || isGoogleLoading}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@example.com"
+                disabled={isLoading || isGoogleLoading}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                disabled={isLoading || isGoogleLoading}
+                required
+              />
+            </div>
+
+            {error && (
+              <p className="text-sm font-medium text-destructive">{error}</p>
+            )}
+
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isLoading || isGoogleLoading}
+            >
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create account
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
-// Google SVG Icon Component
 function GoogleIcon() {
   return (
     <svg
