@@ -18,6 +18,12 @@ import {
 
 const initialState: FirstContactState = {};
 
+const labelClass =
+  "text-sm uppercase tracking-[0.18em] text-primary-foreground/80";
+
+const fieldClass =
+  "h-auto rounded-none border-0 border-b border-primary-foreground/30 bg-transparent px-0 pb-4 font-serif text-2xl normal-case tracking-normal text-primary-foreground shadow-none outline-none placeholder:text-primary-foreground/50 focus-visible:border-accent focus-visible:ring-0";
+
 export function Contact() {
   const [state, formAction, isPending] = useActionState(
     firstContactAction,
@@ -53,12 +59,10 @@ export function Contact() {
       />
 
       <div className="relative z-10 mx-auto max-w-[1180px]">
-
         {/* Heading */}
         <div className="max-w-4xl">
-
           <Reveal y={16} delay={0.05}>
-            <p className="text-xs uppercase tracking-[0.25em] text-accent">
+            <p className="text-sm uppercase tracking-[0.22em] text-accent">
               The first step
             </p>
           </Reveal>
@@ -71,37 +75,24 @@ export function Contact() {
           </Reveal>
 
           <Reveal y={20} delay={0.3}>
-            <p className="mt-10 max-w-lg text-base leading-7 text-primary-foreground/65">
+            <p className="mt-10 max-w-xl text-lg leading-8 text-primary-foreground/80 sm:text-xl sm:leading-9">
               Tell me a little about where you are and what you&apos;re longing
               for. There&apos;s no perfect way to begin.
             </p>
           </Reveal>
-
         </div>
 
         {/* Form */}
-        <Reveal
-          y={28}
-          delay={0.4}
-          className="relative z-10 mt-16 max-w-3xl"
-        >
-          <form
-            className="grid gap-8"
-            action={formAction}
-          >
+        <Reveal y={28} delay={0.4} className="relative z-10 mt-16 max-w-3xl">
+          <form className="grid gap-10" action={formAction}>
             {/* Which questionnaire this lead continues into */}
             <input type="hidden" name="formId" value="intake" />
 
-            <div className="grid gap-8 sm:grid-cols-2">
-
+            <div className="grid gap-10 sm:grid-cols-2">
               <div className="grid gap-3">
-                <Label
-                  htmlFor="name"
-                  className="text-xs uppercase tracking-[0.2em] text-primary-foreground/60"
-                >
+                <Label htmlFor="name" className={labelClass}>
                   Your name
                 </Label>
-
                 <Input
                   id="name"
                   name="name"
@@ -109,18 +100,14 @@ export function Contact() {
                   required
                   autoComplete="name"
                   placeholder="Your name"
-                  className="h-auto rounded-none border-0 border-b border-primary-foreground/25 bg-transparent px-0 pb-4 font-serif text-xl normal-case tracking-normal text-primary-foreground shadow-none outline-none placeholder:text-primary-foreground/35 focus-visible:border-accent focus-visible:ring-0"
+                  className={fieldClass}
                 />
               </div>
 
               <div className="grid gap-3">
-                <Label
-                  htmlFor="email"
-                  className="text-xs uppercase tracking-[0.2em] text-primary-foreground/60"
-                >
+                <Label htmlFor="email" className={labelClass}>
                   Email address
                 </Label>
-
                 <Input
                   id="email"
                   name="email"
@@ -128,32 +115,27 @@ export function Contact() {
                   required
                   autoComplete="email"
                   placeholder="you@example.com"
-                  className="h-auto rounded-none border-0 border-b border-primary-foreground/25 bg-transparent px-0 pb-4 font-serif text-xl normal-case tracking-normal text-primary-foreground shadow-none outline-none placeholder:text-primary-foreground/35 focus-visible:border-accent focus-visible:ring-0"
+                  className={fieldClass}
                 />
               </div>
-
             </div>
 
             <div className="grid gap-3">
-              <Label
-                htmlFor="message"
-                className="text-xs uppercase tracking-[0.2em] text-primary-foreground/60"
-              >
+              <Label htmlFor="message" className={labelClass}>
                 What&apos;s on your mind?
               </Label>
-
               <Textarea
                 id="message"
                 name="message"
                 required
                 rows={3}
                 placeholder="A few words about where you are..."
-                className="min-h-24 resize-none rounded-none border-0 border-b border-primary-foreground/25 bg-transparent px-0 pb-4 font-serif text-xl normal-case tracking-normal text-primary-foreground shadow-none outline-none placeholder:text-primary-foreground/35 focus-visible:border-accent focus-visible:ring-0"
+                className={`min-h-28 resize-none ${fieldClass}`}
               />
             </div>
 
             {state.error && (
-              <p role="alert" className="text-sm text-accent">
+              <p role="alert" className="text-base text-accent">
                 {state.error}
               </p>
             )}
@@ -162,10 +144,10 @@ export function Contact() {
               type="submit"
               variant="link"
               disabled={isPending}
-              className="mt-2 h-auto w-fit gap-4 rounded-none border-b border-accent px-0 pb-4 text-xs uppercase tracking-[0.2em] text-accent no-underline hover:text-primary-foreground"
+              className="mt-2 h-auto w-fit gap-4 rounded-none border-b border-accent px-0 pb-4 text-sm uppercase tracking-[0.18em] text-accent no-underline hover:text-primary-foreground"
             >
               {isPending ? "One moment..." : "Start a conversation"}
-              <ArrowUpRight size={16} />
+              <ArrowUpRight size={18} />
             </Button>
           </form>
         </Reveal>
