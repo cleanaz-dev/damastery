@@ -1,6 +1,6 @@
 "use client";
 
-import type { SubmitEvent } from "react";
+import { useActionState } from "react";
 
 import { ArrowUpRight } from "lucide-react";
 
@@ -11,11 +11,18 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { Reveal } from "@/components/misc/reveal";
 
+import {
+  firstContactAction,
+  type FirstContactState,
+} from "@/lib/actions/first-time-contact";
+
+const initialState: FirstContactState = {};
+
 export function Contact() {
-  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
-    event.preventDefault();
-    event.currentTarget.reset();
-  }
+  const [state, formAction, isPending] = useActionState(
+    firstContactAction,
+    initialState,
+  );
 
   return (
     <section
@@ -80,8 +87,11 @@ export function Contact() {
         >
           <form
             className="grid gap-8"
-            onSubmit={handleSubmit}
+            action={formAction}
           >
+            {/* Which questionnaire this lead continues into */}
+            <input type="hidden" name="formId" value="intake" />
+
             <div className="grid gap-8 sm:grid-cols-2">
 
               <div className="grid gap-3">
@@ -142,12 +152,19 @@ export function Contact() {
               />
             </div>
 
+            {state.error && (
+              <p role="alert" className="text-sm text-accent">
+                {state.error}
+              </p>
+            )}
+
             <Button
               type="submit"
               variant="link"
+              disabled={isPending}
               className="mt-2 h-auto w-fit gap-4 rounded-none border-b border-accent px-0 pb-4 text-xs uppercase tracking-[0.2em] text-accent no-underline hover:text-primary-foreground"
             >
-              Start a conversation
+              {isPending ? "One moment..." : "Start a conversation"}
               <ArrowUpRight size={16} />
             </Button>
           </form>

@@ -9,9 +9,7 @@ export function Footer() {
   return (
     <footer className="bg-primary px-6 pb-8 pt-16 text-primary-foreground sm:px-10 lg:px-16">
       <div className="mx-auto max-w-[1180px]">
-
         <div className="grid gap-12 border-b border-primary-foreground/15 pb-12 md:grid-cols-[1.5fr_1fr_1fr]">
-
           {/* Brand */}
           <div>
             <a
@@ -67,7 +65,6 @@ export function Footer() {
               Book a conversation
             </a>
           </div>
-
         </div>
 
         {/* Bottom */}
@@ -80,7 +77,6 @@ export function Footer() {
             Made for becoming
           </p>
         </div>
-
       </div>
     </footer>
   );

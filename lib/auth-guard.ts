@@ -19,3 +19,12 @@ export const requireAdmin = cache(async () => {
 
   return session;
 });
+
+export const isRegistered = cache(async () => {
+  const session = await auth.api.getSession({ headers: await headers() });
+
+  if (!session) redirect("/register");
+
+  return session;
+});
+
