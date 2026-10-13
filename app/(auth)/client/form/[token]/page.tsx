@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { redis } from "@/lib/redis";
 import type { PendingClient } from "@/lib/actions/first-time-contact";
 import { IntakeForm } from "@/components/forms/intake-form";
+import { isRegistered } from "@/lib/auth-guard";
 
 const forms = {
   intake: IntakeForm,
@@ -15,8 +16,10 @@ export default async function Page({
 }) {
   const { token } = await params;
 
+  const session = await isRegistered(`/form/${token}`);
+
   const pending = await redis.get<PendingClient>(`client:${token}`);
-  if (!pending) notFound(); // expired or invalid link
+  if (!pending) notFound();
 
   const Form = forms[pending.formId];
 
