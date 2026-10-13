@@ -13,7 +13,7 @@ export default async function ClientDashboardPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA] text-stone-800 font-sans selection:bg-stone-200">
+        <div className="min-h-screen bg-stone-200 text-stone-800 font-sans selection:bg-stone-200">
             {/* Minimal Top Navigation */}
             <nav className="w-full max-w-5xl mx-auto px-6 py-8 flex justify-between items-center">
                 <span className="font-serif text-lg tracking-wide text-stone-900">Elevate.</span>
