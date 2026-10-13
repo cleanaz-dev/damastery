@@ -114,29 +114,35 @@ export function IntakeForm({ token, defaults }: Props) {
   }, []);
 
   function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setShowErrors(true);
-    setError(null);
+  e.preventDefault();
+  setShowErrors(true);
+  setError(null);
 
-    if (answered < TOTAL || !support || !heavy || !ack) {
-      setError("A few things still need answering — they're marked in red.");
-      return;
-    }
+  const missing: string[] = [];
+  if (answered < TOTAL) missing.push(`${TOTAL - answered} of the 25 statements`);
+  if (!support) missing.push("the therapist/treatment question");
+  if (!heavy) missing.push("the 'heavier than a habit' question");
+  if (!ack) missing.push("the checkbox");
 
-    startTransition(async () => {
-      try {
-        const payload = {
-          answers,
-          open: { reach: reach.filter(Boolean), story, first, want },
-          fit: { support, heavy, ack },
-        };
-        // await submitIntake(token, payload);
-        console.log("submit intake", token, payload);
-      } catch {
-        setError("Something went wrong. Please try again.");
-      }
-    });
+  if (missing.length > 0) {
+    setError("Missing: " + missing.join(", "));
+    return;
   }
+
+  startTransition(async () => {
+    try {
+      const payload = {
+        answers,
+        open: { reach: reach.filter(Boolean), story, first, want },
+        fit: { support, heavy, ack },
+      };
+      // await submitIntake(token, payload);
+      console.log("submit intake", token, payload);
+    } catch {
+      setError("Something went wrong. Please try again.");
+    }
+  });
+}
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
