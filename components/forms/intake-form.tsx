@@ -1,3 +1,4 @@
+// components/forms/intake-form.tsx
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
@@ -13,7 +14,7 @@ import { LikertQuestion } from "./parts/likert-question";
 import { TextAreaField } from "./parts/text-area-field";
 import { TextListField } from "./parts/text-list-field";
 
-// r = reverse scored (agreeing means LESS friction)
+// ... [SECTIONS array remains exactly the same] ...
 export const SECTIONS = [
   {
     id: "A",
@@ -90,6 +91,7 @@ type Props = {
 };
 
 export function IntakeForm({ token, defaults }: Props) {
+  // ... [State declarations remain exactly the same] ...
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [reach, setReach] = useState(["", "", ""]);
   const [story, setStory] = useState("");
@@ -104,7 +106,6 @@ export function IntakeForm({ token, defaults }: Props) {
 
   const answered = Object.keys(answers).length;
 
-  // number each question q1..q25 in order
   const numbered = useMemo(() => {
     let n = 0;
     return SECTIONS.map((s) => ({
@@ -114,62 +115,75 @@ export function IntakeForm({ token, defaults }: Props) {
   }, []);
 
   function handleSubmit(e: React.FormEvent) {
-  e.preventDefault();
-  setShowErrors(true);
-  setError(null);
+    e.preventDefault();
+    setShowErrors(true);
+    setError(null);
 
-  const missing: string[] = [];
-  if (answered < TOTAL) missing.push(`${TOTAL - answered} of the 25 statements`);
-  if (!support) missing.push("the therapist/treatment question");
-  if (!heavy) missing.push("the 'heavier than a habit' question");
-  if (!ack) missing.push("the checkbox");
+    const missing: string[] = [];
+    if (answered < TOTAL) missing.push(`${TOTAL - answered} of the 25 statements`);
+    if (!support) missing.push("the therapist/treatment question");
+    if (!heavy) missing.push("the 'heavier than a habit' question");
+    if (!ack) missing.push("the checkbox");
 
-  if (missing.length > 0) {
-    setError("Missing: " + missing.join(", "));
-    return;
+    if (missing.length > 0) {
+      setError("Missing: " + missing.join(", "));
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        const payload = {
+          answers,
+          open: { reach: reach.filter(Boolean), story, first, want },
+          fit: { support, heavy, ack },
+        };
+        // await submitIntake(token, payload);
+        console.log("submit intake", token, payload);
+      } catch {
+        setError("Something went wrong. Please try again.");
+      }
+    });
   }
 
-  startTransition(async () => {
-    try {
-      const payload = {
-        answers,
-        open: { reach: reach.filter(Boolean), story, first, want },
-        fit: { support, heavy, ack },
-      };
-      // await submitIntake(token, payload);
-      console.log("submit intake", token, payload);
-    } catch {
-      setError("Something went wrong. Please try again.");
-    }
-  });
-}
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <FormHeader eyebrow="Damastery · Week 0" title="The Baseline Audit">
-        Hi {defaults.name.split(" ")[0]}. Twenty-five statements, four questions, ten
-        minutes. Answer for the last 30 days, not your best week. Honest beats impressive.
-      </FormHeader>
+    // Increased space-y-6 to space-y-16 for premium breathing room
+    <form onSubmit={handleSubmit} className="space-y-16 animate-in fade-in duration-700">
+      
+      <div className="space-y-8">
+        <FormHeader 
+          eyebrow="Damastery · Week 0" 
+          title="The Baseline Audit"
+        >
+          {/* Increased text size and line height for high readability */}
+          <p className="text-lg md:text-xl text-slate-600 font-serif leading-relaxed max-w-2xl">
+            Hi {defaults.name.split(" ")[0]}. Twenty-five statements, four questions, ten
+            minutes. Answer for the last 30 days, not your best week. Honest beats impressive.
+          </p>
+        </FormHeader>
 
-      <FormProgress done={answered} total={TOTAL} />
+        <FormProgress done={answered} total={TOTAL} />
+      </div>
 
-      {numbered.map((s) => (
-        <FormSection key={s.id} step={s.id} title={s.title} sub={s.sub}>
-          <FieldGroup className="gap-0 divide-y px-5">
-            {s.items.map((it) => (
-              <LikertQuestion
-                key={it.key}
-                name={it.key}
-                n={it.n}
-                text={it.t}
-                value={answers[it.key] ?? ""}
-                onChange={(v) => setAnswers((a) => ({ ...a, [it.key]: v }))}
-                missing={showErrors && !answers[it.key]}
-              />
-            ))}
-          </FieldGroup>
-        </FormSection>
-      ))}
+      <div className="space-y-12">
+        {numbered.map((s) => (
+          <FormSection key={s.id} step={s.id} title={s.title} sub={s.sub}>
+            {/* Added md:px-8 to give the form items room inside the border */}
+            <FieldGroup className="gap-0 divide-y divide-slate-200 px-5 md:px-8">
+              {s.items.map((it) => (
+                <LikertQuestion
+                  key={it.key}
+                  name={it.key}
+                  n={it.n}
+                  text={it.t}
+                  value={answers[it.key] ?? ""}
+                  onChange={(v) => setAnswers((a) => ({ ...a, [it.key]: v }))}
+                  missing={showErrors && !answers[it.key]}
+                />
+              ))}
+            </FieldGroup>
+          </FormSection>
+        ))}
+      </div>
 
       {/* F — open */}
       <FormSection
@@ -177,7 +191,7 @@ export function IntakeForm({ token, defaults }: Props) {
         title="In your own words"
         sub="This is the part that matters most. Short is fine. Honest is required."
       >
-        <FieldGroup className="gap-6 p-5">
+        <FieldGroup className="gap-8 p-6 md:p-8">
           <TextListField
             label="The three things I reach for when it gets hard"
             values={reach}
@@ -212,7 +226,7 @@ export function IntakeForm({ token, defaults }: Props) {
         title="Fit check"
         sub="Coaching is not therapy. These make sure you get the right kind of help first."
       >
-        <FieldGroup className="gap-6 p-5">
+        <FieldGroup className="gap-8 p-6 md:p-8">
           <ChoiceField
             name="support"
             label="Are you currently working with a therapist, doctor, counsellor, or treatment program?"
@@ -230,17 +244,31 @@ export function IntakeForm({ token, defaults }: Props) {
             showError={showErrors}
           />
           <AckField id="ack" checked={ack} onChange={setAck} showError={showErrors}>
-            I understand this is a coaching self-assessment, not a clinical screening or a
-            diagnosis, and that coaching is not a substitute for therapy or medical care.
+            <span className="text-base text-slate-600 leading-relaxed">
+              I understand this is a coaching self-assessment, not a clinical screening or a
+              diagnosis, and that coaching is not a substitute for therapy or medical care.
+            </span>
           </AckField>
         </FieldGroup>
       </FormSection>
 
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && (
+        <div className="bg-red-50 text-red-800 p-4 rounded-sm border border-red-200">
+          <p className="text-sm font-medium">{error}</p>
+        </div>
+      )}
 
-      <Button type="submit" size="lg" className="w-full" disabled={pending}>
-        {pending ? "Submitting…" : "Submit my baseline"}
-      </Button>
+      <div className="pt-8">
+        {/* Made the submit button slightly taller, darker, and bolder for a premium finish */}
+        <Button 
+          type="submit" 
+          size="lg" 
+          className="w-full py-8 text-lg bg-slate-900 hover:bg-slate-800 text-white font-medium tracking-wide uppercase shadow-xl hover:shadow-2xl transition-all" 
+          disabled={pending}
+        >
+          {pending ? "Submitting…" : "Submit my baseline"}
+        </Button>
+      </div>
     </form>
   );
 }

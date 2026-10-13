@@ -1,3 +1,4 @@
+// app/forms/[token]/page.tsx
 import { notFound } from "next/navigation";
 import { redis } from "@/lib/redis";
 import type { PendingClient } from "@/lib/actions/first-time-contact";
@@ -23,8 +24,12 @@ export default async function Page({
   const Form = forms[pending.formId];
 
   return (
-    <main className="mx-auto max-w-md p-6">
-      <Form token={token} defaults={pending} />
-    </main>
+    // Added a subtle warm off-white background matching your screenshot
+    <div className="min-h-screen bg-[#F6F5F2] selection:bg-slate-200">
+      {/* Changed max-w-md to max-w-3xl for a much wider, readable layout */}
+      <main className="mx-auto max-w-3xl px-6 py-16 md:py-24 font-sans text-slate-900">
+        <Form token={token} defaults={pending} />
+      </main>
+    </div>
   );
 }
