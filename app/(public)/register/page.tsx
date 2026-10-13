@@ -15,7 +15,7 @@ export default async function RegisterPage({
   if (!pending) notFound(); // expired or invalid link
 
   return (
-    <main className="mx-auto max-w-md p-6">
+    <main>
       <RegisterForm
         token={token}
         defaults={{ name: pending.name, email: pending.email }}
