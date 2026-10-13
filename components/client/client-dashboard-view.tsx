@@ -18,9 +18,10 @@ export default function ClientDashboardView({
     const hasPreSession = data.profile?.submissions.some(s => s.formSlug === "pre-session");
 
     return (
-        <div className="space-y-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {/* Header / Greeting */}
-            <header className="space-y-3">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            
+            {/* Header / Greeting Card */}
+            <header className="bg-white p-8 md:p-12 rounded-3xl border border-stone-200 shadow-sm space-y-3">
                 <h1 className="font-serif text-4xl md:text-5xl text-stone-900 tracking-tight">
                     Welcome back, {firstName}.
                 </h1>
@@ -29,9 +30,9 @@ export default function ClientDashboardView({
                 </p>
             </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* SESSIONS SECTION */}
-                <section className="space-y-8">
+                <section className="bg-white p-8 md:p-10 rounded-3xl border border-stone-200 shadow-sm space-y-8">
                     <h2 className="text-xs font-semibold tracking-[0.2em] text-stone-400 uppercase">
                         Upcoming Sessions
                     </h2>
@@ -41,7 +42,7 @@ export default function ClientDashboardView({
                             data.bookings.map((booking) => (
                                 <div
                                     key={booking.id}
-                                    className="group border-b border-stone-200 pb-6 flex items-start justify-between hover:border-stone-400 transition-colors"
+                                    className="group border-b border-stone-100 pb-6 flex items-start justify-between hover:border-stone-300 transition-colors"
                                 >
                                     <div>
                                         <p className="font-medium text-stone-900">
@@ -69,7 +70,7 @@ export default function ClientDashboardView({
                                 </div>
                             ))
                         ) : (
-                            <div className="border border-stone-200 border-dashed rounded-2xl p-8 text-center">
+                            <div className="border border-stone-200 border-dashed rounded-2xl p-8 text-center bg-stone-50/50">
                                 <Calendar className="w-6 h-6 text-stone-300 mx-auto mb-3" />
                                 <p className="text-stone-500 text-sm">No upcoming sessions.</p>
                                 <button className="mt-4 text-sm text-stone-900 border-b border-stone-900 pb-0.5 hover:text-stone-600 hover:border-stone-600 transition-all">
@@ -81,7 +82,7 @@ export default function ClientDashboardView({
                 </section>
 
                 {/* TO-DO SECTION */}
-                <section className="space-y-8">
+                <section className="bg-white p-8 md:p-10 rounded-3xl border border-stone-200 shadow-sm space-y-8">
                     <h2 className="text-xs font-semibold tracking-[0.2em] text-stone-400 uppercase">
                         Action Items
                     </h2>
@@ -117,15 +118,15 @@ function ActionItem({
 }) {
     return (
         <div
-            className={`flex items-center justify-between p-5 transition-all duration-300 ${
+            className={`flex items-center justify-between p-5 rounded-2xl transition-all duration-300 ${
                 isCompleted
-                    ? "bg-transparent border border-stone-100 opacity-60"
-                    : "bg-white border border-stone-200 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.02)]"
+                    ? "bg-stone-50 border border-stone-100 opacity-60"
+                    : "bg-white border border-stone-200 hover:border-stone-300 hover:shadow-sm"
             }`}
         >
             <div className="flex items-center gap-4">
                 {isCompleted ? (
-                    <CheckCircle2 className="w-5 h-5 text-stone-300" strokeWidth={1.5} />
+                    <CheckCircle2 className="w-5 h-5 text-stone-400" strokeWidth={1.5} />
                 ) : (
                     <CircleDashed className="w-5 h-5 text-stone-800" strokeWidth={1.5} />
                 )}
@@ -133,7 +134,7 @@ function ActionItem({
                     className={`text-sm ${
                         isCompleted
                             ? "text-stone-400 line-through decoration-stone-200"
-                            : "text-stone-800"
+                            : "text-stone-800 font-medium"
                     }`}
                 >
                     {title}
@@ -141,7 +142,7 @@ function ActionItem({
             </div>
 
             {!isCompleted && (
-                <button className="text-xs font-medium uppercase tracking-wider text-stone-500 hover:text-stone-900 transition-colors">
+                <button className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-stone-500 hover:text-stone-900 transition-colors">
                     {actionText}
                 </button>
             )}
