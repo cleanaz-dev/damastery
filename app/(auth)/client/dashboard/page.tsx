@@ -19,7 +19,7 @@ export default async function ClientDashboardPage() {
 
   return (
     // THE CENTRAL COLUMN: Darker stone-200. Zero borders. Zero shadows.
-    <div className="min-h-screen max-w-5xl mx-auto bg-stone-200 text-stone-800 font-sans selection:bg-stone-400">
+    <div className="min-h-screen max-w-5xl mx-auto bg-stone-50 text-stone-800 font-sans selection:bg-stone-400">
       {/* Minimal Top Navigation - border removed completely */}
       <nav className="w-full px-8 md:px-12 py-8 flex justify-between items-center">
         <span className="font-serif text-lg tracking-wide text-stone-900">
@@ -31,7 +31,7 @@ export default async function ClientDashboardPage() {
       </nav>
 
       {/* Dashboard Content */}
-      <main className="w-full max-w-4xl mx-auto px-8 md:px-12 py-16 md:py-24">
+      <main className="w-full max-w-4xl mx-auto px-8 md:px-12 py-16">
         <ClientDashboardView clientData={clientData} />
       </main>
     </div>
