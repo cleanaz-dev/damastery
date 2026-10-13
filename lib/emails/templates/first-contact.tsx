@@ -67,7 +67,6 @@ export function FirstContactEmail({ name, url }: FirstContactEmailProps) {
             {/* Footer Text */}
             <Text className="text-[13px] leading-[24px] text-zinc-500">
               © 2026 Damastery. All rights reserved. <br />
-              Whitby, ON, Canada
             </Text>
           </Container>
         </Body>
