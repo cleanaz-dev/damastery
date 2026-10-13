@@ -8,6 +8,7 @@ import {
   Text,
   Button,
   Tailwind,
+  pixelBasedPreset,
   Section,
   Hr,
 } from "react-email";
@@ -20,12 +21,11 @@ type FirstContactEmailProps = {
 export function FirstContactEmail({ name, url }: FirstContactEmailProps) {
   return (
     <Html lang="en">
-      <Head />
-      <Preview>Next steps with Damastery</Preview>
-      <Tailwind>
+      <Tailwind config={{ presets: [pixelBasedPreset] }}>
+        <Head />
+        <Preview>Next steps with Damastery</Preview>
         <Body className="bg-zinc-50 font-sans text-zinc-900">
           <Container className="mx-auto my-[40px] max-w-[480px] rounded-xl border border-zinc-200 bg-white p-[32px] shadow-sm">
-            
             {/* Logo Section */}
             <Section className="mb-[32px]">
               <Text className="m-0 text-xl font-bold tracking-tight text-zinc-950">
@@ -40,7 +40,7 @@ export function FirstContactEmail({ name, url }: FirstContactEmailProps) {
 
             {/* Body Text */}
             <Text className="text-[15px] leading-[24px] text-zinc-600">
-              Hi {name.split(" ")[0]}, thanks for reaching out! We're thrilled to connect with you. 
+              Hi {name.split(" ")[0]}, thanks for reaching out! We're thrilled to connect with you.
             </Text>
 
             <Text className="mt-[16px] text-[15px] leading-[24px] text-zinc-600">
