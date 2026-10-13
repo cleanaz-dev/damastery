@@ -22,7 +22,7 @@ const labelClass =
   "text-sm uppercase tracking-[0.18em] text-primary-foreground/80";
 
 const fieldClass =
-  "h-auto rounded-none border-0 border-b border-primary-foreground/30 bg-transparent px-0 pb-4 font-serif text-2xl normal-case tracking-normal text-primary-foreground shadow-none outline-none placeholder:text-primary-foreground/50 focus-visible:border-accent focus-visible:ring-0";
+  "h-auto rounded-none border-0 border-b border-primary-foreground/30 bg-transparent px-0 pb-4 font-serif text-2xl md:text-2xl normal-case tracking-normal text-primary-foreground shadow-none outline-none placeholder:text-primary-foreground/50 focus-visible:border-accent focus-visible:ring-0";
 
 export function Contact() {
   const [state, formAction, isPending] = useActionState(
