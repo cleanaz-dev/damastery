@@ -1,3 +1,6 @@
+// components/forms/parts/form-header.tsx
+import { ReactNode } from "react";
+
 export function FormHeader({
   eyebrow,
   title,
@@ -5,17 +8,20 @@ export function FormHeader({
 }: {
   eyebrow?: string;
   title: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }) {
   return (
-    <header className="space-y-2">
+    <header className="space-y-4 pb-6">
       {eyebrow && (
-        <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+        <p className="text-sm font-bold uppercase tracking-widest text-stone-500">
           {eyebrow}
         </p>
       )}
-      <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-      {children && <p className="text-muted-foreground">{children}</p>}
+      <h1 className="font-serif text-4xl md:text-5xl font-bold tracking-tight text-stone-950">
+        {title}
+      </h1>
+      {/* THE FIX: Removed the <p text-muted-foreground> wrapper so your text stays large and dark! */}
+      {children && <div className="pt-2">{children}</div>}
     </header>
   );
 }

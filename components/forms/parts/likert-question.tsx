@@ -1,12 +1,11 @@
+// components/forms/parts/likert-question.tsx
 "use client";
 
-import { Field, FieldLabel } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 import { choiceStyle } from "./choice-style";
 
-// 1–5 scale
 export function LikertQuestion({
   name,
   n,
@@ -27,29 +26,25 @@ export function LikertQuestion({
   highLabel?: string;
 }) {
   return (
-    // Increased vertical padding (py-8) so the questions don't feel clustered
-    <Field data-invalid={missing} className={cn("py-6 md:py-8", missing && "bg-red-50/30 px-4 -mx-4 rounded-md")}>
+    <div className={cn("py-8 md:py-10 border-b border-stone-300", missing && "bg-red-50/50 p-4 rounded-md")}>
       
-      {/* 
-        Made the label flex so the number stays at the top if the text wraps. 
-        Bumped to text-base/lg, darkened to slate-900, and added bottom margin.
-      */}
-      <FieldLabel 
-        className={cn(
-          "flex items-start mb-5 font-medium text-base md:text-lg text-slate-900 leading-relaxed", 
-          missing && "text-red-700"
-        )}
-      >
-        <span className="mr-4 mt-0.5 font-mono text-sm font-bold text-slate-400 shrink-0">
+      {/* QUESTION TITLE: Forced large text and high contrast */}
+      <div className="flex items-start gap-4 mb-6">
+        <span className="font-mono text-base md:text-lg font-bold text-stone-500 mt-0.5 shrink-0">
           {String(n).padStart(2, "0")}
         </span>
-        <span>{text}</span>
-      </FieldLabel>
+        <span className={cn(
+          "text-lg md:text-2xl font-bold text-stone-950 leading-snug tracking-tight", 
+          missing && "text-red-700"
+        )}>
+          {text}
+        </span>
+      </div>
 
+      {/* 1-5 RADIO BUTTONS */}
       <RadioGroup
         value={value}
         onValueChange={(v) => onChange(v as string)}
-        // Increased gap slightly for larger screens
         className="grid grid-cols-5 gap-2 md:gap-3"
       >
         {[1, 2, 3, 4, 5].map((v) => {
@@ -60,22 +55,21 @@ export function LikertQuestion({
               htmlFor={id}
               className={cn(
                 choiceStyle,
-                // Taller hit area (h-14/16), cursor-pointer, and explicit text sizing
-                "flex h-14 md:h-16 flex-col items-center justify-center gap-1.5 text-sm md:text-base font-semibold cursor-pointer transition-all"
+                "flex h-16 md:h-20 flex-col items-center justify-center gap-2 text-base md:text-xl font-bold cursor-pointer transition-all border-2 border-stone-300 hover:border-stone-900"
               )}
             >
-              <RadioGroupItem value={String(v)} id={id} />
-              {v}
+              <RadioGroupItem value={String(v)} id={id} className="scale-125" />
+              <span>{v}</span>
             </Label>
           );
         })}
       </RadioGroup>
 
-      {/* Darkened text, bumped size, increased tracking (letter-spacing) */}
-      <div className="flex justify-between mt-3 px-1 font-mono text-[10px] md:text-xs font-semibold uppercase tracking-widest text-slate-500">
+      {/* LABELS: Darkened and bumped up */}
+      <div className="flex justify-between mt-4 px-1 font-mono text-xs md:text-sm font-bold uppercase tracking-wider text-stone-700">
         <span>{lowLabel}</span>
         <span>{highLabel}</span>
       </div>
-    </Field>
+    </div>
   );
 }
