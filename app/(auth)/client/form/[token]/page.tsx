@@ -15,7 +15,7 @@ export default async function Page({
 }) {
   const { token } = await params;
 
-  await isRegistered(`/client/form/${token}`);
+  await isRegistered(undefined, `/register?token=${token}`);
 
   const pending = await redis.get<PendingClient>(`client:${token}`);
   if (!pending) notFound();

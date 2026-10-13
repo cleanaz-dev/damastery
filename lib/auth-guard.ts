@@ -20,17 +20,19 @@ export const requireAdmin = cache(async () => {
   return session;
 });
 
-export const isRegistered = cache(async (callbackUrl?: string) => {
-  const session = await auth.api.getSession({ headers: await headers() });
+export const isRegistered = cache(
+  async (callbackUrl?: string, registerUrl?: string) => {
+    const session = await auth.api.getSession({ headers: await headers() });
 
-  if (!session) {
-    redirect(
-      callbackUrl
-        ? `/register?callbackUrl=${encodeURIComponent(callbackUrl)}`
-        : "/register"
-    );
+    if (!session) {
+      redirect(
+        registerUrl ??
+          (callbackUrl
+            ? `/register?callbackUrl=${encodeURIComponent(callbackUrl)}`
+            : "/register")
+      );
+    }
+
+    return session;
   }
-
-  return session;
-});
-
+);
