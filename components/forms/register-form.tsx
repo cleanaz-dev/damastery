@@ -2,18 +2,11 @@
 
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
-import { Loader2 } from "lucide-react";
+import { Loader2, Zap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 type Props = {
   token: string;
@@ -65,99 +58,151 @@ export function RegisterForm({ token, defaults }: Props) {
   }
 
   return (
-    // THIS WRAPPER IS WHAT CENTERS IT ON THE SCREEN
-    <div className="flex min-h-screen w-full items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-sm">
-        <CardHeader className="space-y-2 text-center">
-          <CardTitle className="text-2xl font-semibold tracking-tight">
-            Hi {defaults.name.split(" ")[0]}, create your account
-          </CardTitle>
-          <CardDescription className="text-muted-foreground">
-            Choose your preferred method to sign up
-          </CardDescription>
-        </CardHeader>
+    <div className="flex min-h-screen w-full flex-col bg-background lg:flex-row">
+      {/* 
+        LEFT SIDE: IMMERSIVE BRANDING AREA (Hidden on mobile, 50% width on desktop) 
+        Features a dark background with modern ambient gradient blobs
+      */}
+      <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-zinc-950 p-12 text-white lg:flex">
+        {/* Ambient background glows */}
+        <div className="absolute -left-1/4 -top-1/4 h-[800px] w-[800px] rounded-full bg-indigo-500/20 blur-[120px]" />
+        <div className="absolute -bottom-1/4 -right-1/4 h-[600px] w-[600px] rounded-full bg-blue-600/20 blur-[100px]" />
         
-        <CardContent className="space-y-6">
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full font-normal"
-            onClick={handleGoogle}
-            disabled={isLoading || isGoogleLoading}
-          >
-            {isGoogleLoading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <GoogleIcon />
-            )}
-            Continue with Google
-          </Button>
+        {/* Logo/Brand */}
+        <div className="relative z-10 flex items-center gap-2 text-xl font-bold tracking-tight">
+          <Zap className="h-6 w-6 text-indigo-400" />
+          <span>YourBrand</span>
+        </div>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with email
-              </span>
-            </div>
+        {/* Brand messaging / Testimonial */}
+        <div className="relative z-10 mt-auto max-w-lg">
+          <blockquote className="space-y-4">
+            <p className="text-3xl font-medium leading-tight">
+              "Building the future starts here. Welcome to the next generation of our platform."
+            </p>
+            <footer className="text-sm text-zinc-400">
+              — The Team
+            </footer>
+          </blockquote>
+        </div>
+      </div>
+
+      {/* 
+        RIGHT SIDE: THE FORM (Full width on mobile, 50% width on desktop) 
+        No cards, clean typography, lots of breathing room
+      */}
+      <div className="flex w-full items-center justify-center p-8 lg:w-1/2 lg:p-12">
+        <div className="mx-auto flex w-full max-w-md flex-col justify-center space-y-8">
+          
+          {/* Header */}
+          <div className="flex flex-col space-y-2 text-left">
+            <h1 className="text-3xl font-bold tracking-tight">
+              Welcome, {defaults.name.split(" ")[0]}
+            </h1>
+            <p className="text-base text-muted-foreground">
+              Let's get your account fully set up.
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="John Doe"
-                disabled={isLoading || isGoogleLoading}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@example.com"
-                disabled={isLoading || isGoogleLoading}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                disabled={isLoading || isGoogleLoading}
-                required
-              />
-            </div>
-
-            {error && (
-              <p className="text-sm font-medium text-destructive">{error}</p>
-            )}
-
-            <Button 
-              type="submit" 
-              className="w-full" 
+          <div className="space-y-6">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-12 w-full text-base font-medium shadow-sm transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              onClick={handleGoogle}
               disabled={isLoading || isGoogleLoading}
             >
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create account
+              {isGoogleLoading ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                <GoogleIcon />
+              )}
+              Continue with Google
             </Button>
-          </form>
-        </CardContent>
-      </Card>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase tracking-wider">
+                <span className="bg-background px-4 text-muted-foreground">
+                  Or continue with email
+                </span>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="John Doe"
+                  className="h-12 text-base transition-all focus-visible:ring-indigo-500"
+                  disabled={isLoading || isGoogleLoading}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  className="h-12 text-base transition-all focus-visible:ring-indigo-500"
+                  disabled={isLoading || isGoogleLoading}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="h-12 text-base transition-all focus-visible:ring-indigo-500"
+                  disabled={isLoading || isGoogleLoading}
+                  required
+                />
+              </div>
+
+              {error && (
+                <div className="rounded-md bg-destructive/10 p-3 text-sm font-medium text-destructive">
+                  {error}
+                </div>
+              )}
+
+              <Button 
+                type="submit" 
+                className="mt-2 h-12 w-full bg-primary text-base text-primary-foreground hover:bg-primary/90" 
+                disabled={isLoading || isGoogleLoading}
+              >
+                {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+                Create account
+              </Button>
+            </form>
+          </div>
+          
+          <p className="text-center text-sm text-muted-foreground">
+            By clicking continue, you agree to our{" "}
+            <a href="#" className="underline underline-offset-4 hover:text-primary">
+              Terms of Service
+            </a>{" "}
+            and{" "}
+            <a href="#" className="underline underline-offset-4 hover:text-primary">
+              Privacy Policy
+            </a>
+            .
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -165,7 +210,7 @@ export function RegisterForm({ token, defaults }: Props) {
 function GoogleIcon() {
   return (
     <svg
-      className="mr-2 h-4 w-4"
+      className="mr-3 h-5 w-5"
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
     >
