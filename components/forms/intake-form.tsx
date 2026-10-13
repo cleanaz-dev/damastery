@@ -14,7 +14,7 @@ import { LikertQuestion } from "./parts/likert-question";
 import { TextAreaField } from "./parts/text-area-field";
 import { TextListField } from "./parts/text-list-field";
 
-// ... [SECTIONS array remains exactly the same] ...
+// [SECTIONS array remains exactly the same]
 export const SECTIONS = [
   {
     id: "A",
@@ -91,7 +91,6 @@ type Props = {
 };
 
 export function IntakeForm({ token, defaults }: Props) {
-  // ... [State declarations remain exactly the same] ...
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [reach, setReach] = useState(["", "", ""]);
   const [story, setStory] = useState("");
@@ -146,7 +145,6 @@ export function IntakeForm({ token, defaults }: Props) {
   }
 
   return (
-    // Increased space-y-6 to space-y-16 for premium breathing room
     <form onSubmit={handleSubmit} className="space-y-16 animate-in fade-in duration-700">
       
       <div className="space-y-8">
@@ -154,8 +152,8 @@ export function IntakeForm({ token, defaults }: Props) {
           eyebrow="Damastery · Week 0" 
           title="The Baseline Audit"
         >
-          {/* Increased text size and line height for high readability */}
-          <p className="text-lg md:text-xl text-slate-600 font-serif leading-relaxed max-w-2xl">
+          {/* UPDATED: Changed from text-slate-600 to text-slate-900 and text-xl for stark readability */}
+          <p className="text-xl md:text-2xl text-slate-900 font-serif leading-relaxed max-w-2xl">
             Hi {defaults.name.split(" ")[0]}. Twenty-five statements, four questions, ten
             minutes. Answer for the last 30 days, not your best week. Honest beats impressive.
           </p>
@@ -167,7 +165,6 @@ export function IntakeForm({ token, defaults }: Props) {
       <div className="space-y-12">
         {numbered.map((s) => (
           <FormSection key={s.id} step={s.id} title={s.title} sub={s.sub}>
-            {/* Added md:px-8 to give the form items room inside the border */}
             <FieldGroup className="gap-0 divide-y divide-slate-200 px-5 md:px-8">
               {s.items.map((it) => (
                 <LikertQuestion
@@ -244,7 +241,8 @@ export function IntakeForm({ token, defaults }: Props) {
             showError={showErrors}
           />
           <AckField id="ack" checked={ack} onChange={setAck} showError={showErrors}>
-            <span className="text-base text-slate-600 leading-relaxed">
+            {/* UPDATED: text-slate-900 instead of slate-600 */}
+            <span className="text-base md:text-lg text-slate-900 leading-relaxed font-medium">
               I understand this is a coaching self-assessment, not a clinical screening or a
               diagnosis, and that coaching is not a substitute for therapy or medical care.
             </span>
@@ -259,7 +257,6 @@ export function IntakeForm({ token, defaults }: Props) {
       )}
 
       <div className="pt-8">
-        {/* Made the submit button slightly taller, darker, and bolder for a premium finish */}
         <Button 
           type="submit" 
           size="lg" 

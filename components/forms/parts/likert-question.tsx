@@ -27,18 +27,30 @@ export function LikertQuestion({
   highLabel?: string;
 }) {
   return (
-    <Field data-invalid={missing} className="py-4">
-      <FieldLabel className={cn("font-normal leading-snug", missing && "text-destructive")}>
-        <span className="mr-2 font-mono text-xs text-muted-foreground">
+    // Increased vertical padding (py-8) so the questions don't feel clustered
+    <Field data-invalid={missing} className={cn("py-6 md:py-8", missing && "bg-red-50/30 px-4 -mx-4 rounded-md")}>
+      
+      {/* 
+        Made the label flex so the number stays at the top if the text wraps. 
+        Bumped to text-base/lg, darkened to slate-900, and added bottom margin.
+      */}
+      <FieldLabel 
+        className={cn(
+          "flex items-start mb-5 font-medium text-base md:text-lg text-slate-900 leading-relaxed", 
+          missing && "text-red-700"
+        )}
+      >
+        <span className="mr-4 mt-0.5 font-mono text-sm font-bold text-slate-400 shrink-0">
           {String(n).padStart(2, "0")}
         </span>
-        {text}
+        <span>{text}</span>
       </FieldLabel>
 
       <RadioGroup
         value={value}
         onValueChange={(v) => onChange(v as string)}
-        className="grid grid-cols-5 gap-2"
+        // Increased gap slightly for larger screens
+        className="grid grid-cols-5 gap-2 md:gap-3"
       >
         {[1, 2, 3, 4, 5].map((v) => {
           const id = `${name}-${v}`;
@@ -48,7 +60,8 @@ export function LikertQuestion({
               htmlFor={id}
               className={cn(
                 choiceStyle,
-                "flex h-12 flex-col items-center justify-center gap-1 text-sm"
+                // Taller hit area (h-14/16), cursor-pointer, and explicit text sizing
+                "flex h-14 md:h-16 flex-col items-center justify-center gap-1.5 text-sm md:text-base font-semibold cursor-pointer transition-all"
               )}
             >
               <RadioGroupItem value={String(v)} id={id} />
@@ -58,7 +71,8 @@ export function LikertQuestion({
         })}
       </RadioGroup>
 
-      <div className="flex justify-between font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+      {/* Darkened text, bumped size, increased tracking (letter-spacing) */}
+      <div className="flex justify-between mt-3 px-1 font-mono text-[10px] md:text-xs font-semibold uppercase tracking-widest text-slate-500">
         <span>{lowLabel}</span>
         <span>{highLabel}</span>
       </div>

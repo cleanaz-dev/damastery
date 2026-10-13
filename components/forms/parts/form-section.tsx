@@ -1,3 +1,6 @@
+// components/forms/parts/form-section.tsx
+import { ReactNode } from "react";
+
 export function FormSection({
   step,
   title,
@@ -6,21 +9,32 @@ export function FormSection({
 }: {
   step: string;
   title: string;
-  sub?: string;
-  children: React.ReactNode;
+  sub: string;
+  children: ReactNode;
 }) {
   return (
-    <section className="overflow-hidden rounded-lg border bg-card">
-      <div className="flex items-baseline gap-3 border-b bg-secondary px-5 py-4">
-        <span className="rounded border bg-background px-2 py-0.5 font-mono text-xs font-semibold text-primary">
+    <section className="bg-white border border-slate-200 shadow-sm rounded-md overflow-hidden">
+      {/* UPDATED: bg-slate-900 for high contrast */}
+      <div className="bg-slate-900 px-6 py-5 flex flex-col md:flex-row md:items-center gap-5">
+        <span className="bg-white text-slate-900 font-bold px-3 py-1 text-sm md:text-base rounded-sm shadow-sm flex-shrink-0">
           {step}
         </span>
         <div>
-          <h2 className="font-semibold">{title}</h2>
-          {sub && <p className="text-sm italic text-muted-foreground">{sub}</p>}
+          {/* UPDATED: text-white so it pops out from the dark blue/slate */}
+          <h2 className="text-lg md:text-xl font-bold text-white tracking-wide">
+            {title}
+          </h2>
+          {/* UPDATED: text-slate-300 so the subtext is legible */}
+          <p className="text-sm md:text-base text-slate-300 font-medium mt-0.5 italic">
+            {sub}
+          </p>
         </div>
       </div>
-      {children}
+      
+      {/* Form Content */}
+      <div className="bg-white">
+        {children}
+      </div>
     </section>
   );
 }
