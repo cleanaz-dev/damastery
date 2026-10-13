@@ -6,7 +6,6 @@ import { isRegistered } from "@/lib/auth-guard";
 
 const forms = {
   intake: IntakeForm,
-  // add more forms here, keys must match FORM_IDS in first-contact-email.ts
 } as const;
 
 export default async function Page({
@@ -16,7 +15,7 @@ export default async function Page({
 }) {
   const { token } = await params;
 
-  const session = await isRegistered(`/form/${token}`);
+  await isRegistered(`/client/form/${token}`);
 
   const pending = await redis.get<PendingClient>(`client:${token}`);
   if (!pending) notFound();
