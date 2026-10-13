@@ -30,8 +30,7 @@ model User {
   emailVerified Boolean   @default(false)
   image         String?
   role          UserRole  @default(CLIENT)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+
 
   // Custom fields from your auth config
   avatarUrl     String?
@@ -45,6 +44,22 @@ model User {
   sessions Session[]
   accounts Account[]
   bookings Booking[]
+
+  profile     ClientProfile?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model ClientProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  submissions FormSubmission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Session {
@@ -111,4 +126,17 @@ model Booking {
   endsAt   DateTime
 
   adminNote String? // For your admin blocks
+}
+
+model FormSubmission {
+  id        String        @id @default(cuid())
+  profileId String
+  profile   ClientProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  formSlug String // e.g. "intake"
+  data     Json
+
+  createdAt DateTime @default(now())
+
+  @@index([profileId])
 }

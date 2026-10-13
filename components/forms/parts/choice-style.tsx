@@ -1,0 +1,2 @@
+export const choiceStyle =
+  "cursor-pointer rounded-md border bg-background font-semibold hover:border-primary has-data-checked:border-primary has-data-checked:bg-primary has-data-checked:text-primary-foreground";
