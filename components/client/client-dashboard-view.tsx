@@ -2,6 +2,8 @@
 
 import type { ClientData } from "@/lib/actions/get-client-data";
 import { Calendar, CheckCircle2, CircleDashed, ArrowRight } from "lucide-react";
+import { Reveal } from "../misc/reveal";
+
 
 const TZ = "America/Toronto"; // or a per-client timezone
 
@@ -18,21 +20,29 @@ export default function ClientDashboardView({
     const hasPreSession = data.profile?.submissions.some(s => s.formSlug === "pre-session");
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="space-y-12">
             
-            {/* Header / Greeting Card */}
-            <header className="bg-white p-8 md:p-12 rounded-3xl border border-stone-200 shadow-sm space-y-3">
-                <h1 className="font-serif text-4xl md:text-5xl text-stone-900 tracking-tight">
-                    Welcome back, {firstName}.
-                </h1>
-                <p className="text-stone-500 text-lg md:text-xl font-light max-w-xl">
-                    Your personal space to track your growth, prepare for sessions, and access your resources.
-                </p>
-            </header>
+            {/* Header / Greeting - Animates first */}
+            <Reveal delay={0} y={20}>
+                <header className="space-y-3 mt-4">
+                    <h1 className="font-serif text-4xl md:text-5xl text-stone-900 tracking-tight">
+                        Welcome back, {firstName}.
+                    </h1>
+                    <p className="text-stone-500 text-lg md:text-xl font-light max-w-xl">
+                        Your personal space to track your growth, prepare for sessions, and access your resources.
+                    </p>
+                </header>
+            </Reveal>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* SESSIONS SECTION */}
-                <section className="bg-white p-8 md:p-10 rounded-3xl border border-stone-200 shadow-sm space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
+                
+                {/* SESSIONS SECTION - Animates second */}
+                <Reveal 
+                    as="section" 
+                    delay={0.15} 
+                    y={30}
+                    className="bg-white/80 backdrop-blur-sm p-8 md:p-10 rounded-3xl space-y-8"
+                >
                     <h2 className="text-xs font-semibold tracking-[0.2em] text-stone-400 uppercase">
                         Upcoming Sessions
                     </h2>
@@ -42,7 +52,7 @@ export default function ClientDashboardView({
                             data.bookings.map((booking) => (
                                 <div
                                     key={booking.id}
-                                    className="group border-b border-stone-100 pb-6 flex items-start justify-between hover:border-stone-300 transition-colors"
+                                    className="group border-b border-stone-200/60 pb-6 flex items-start justify-between hover:border-stone-400 transition-colors"
                                 >
                                     <div>
                                         <p className="font-medium text-stone-900">
@@ -64,13 +74,13 @@ export default function ClientDashboardView({
                                             <span className="capitalize">{booking.status.toLowerCase()}</span>
                                         </p>
                                     </div>
-                                    <button className="text-stone-300 group-hover:text-stone-900 transition-colors pt-1">
+                                    <button className="text-stone-400 group-hover:text-stone-900 transition-colors pt-1">
                                         <ArrowRight className="w-5 h-5" strokeWidth={1.5} />
                                     </button>
                                 </div>
                             ))
                         ) : (
-                            <div className="border border-stone-200 border-dashed rounded-2xl p-8 text-center bg-stone-50/50">
+                            <div className="border border-stone-200 border-dashed rounded-2xl p-8 text-center bg-transparent">
                                 <Calendar className="w-6 h-6 text-stone-300 mx-auto mb-3" />
                                 <p className="text-stone-500 text-sm">No upcoming sessions.</p>
                                 <button className="mt-4 text-sm text-stone-900 border-b border-stone-900 pb-0.5 hover:text-stone-600 hover:border-stone-600 transition-all">
@@ -79,10 +89,15 @@ export default function ClientDashboardView({
                             </div>
                         )}
                     </div>
-                </section>
+                </Reveal>
 
-                {/* TO-DO SECTION */}
-                <section className="bg-white p-8 md:p-10 rounded-3xl border border-stone-200 shadow-sm space-y-8">
+                {/* TO-DO SECTION - Animates third */}
+                <Reveal 
+                    as="section" 
+                    delay={0.3} 
+                    y={30}
+                    className="bg-white/80 backdrop-blur-sm p-8 md:p-10 rounded-3xl space-y-8"
+                >
                     <h2 className="text-xs font-semibold tracking-[0.2em] text-stone-400 uppercase">
                         Action Items
                     </h2>
@@ -100,7 +115,7 @@ export default function ClientDashboardView({
                             actionText="Start Reflection"
                         />
                     </div>
-                </section>
+                </Reveal>
             </div>
         </div>
     );
@@ -120,8 +135,8 @@ function ActionItem({
         <div
             className={`flex items-center justify-between p-5 rounded-2xl transition-all duration-300 ${
                 isCompleted
-                    ? "bg-stone-50 border border-stone-100 opacity-60"
-                    : "bg-white border border-stone-200 hover:border-stone-300 hover:shadow-sm"
+                    ? "bg-transparent opacity-60"
+                    : "bg-white shadow-[0_4px_20px_-8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_20px_-8px_rgba(0,0,0,0.12)]"
             }`}
         >
             <div className="flex items-center gap-4">
