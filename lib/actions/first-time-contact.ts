@@ -54,5 +54,5 @@ export async function firstContactAction(
   }
 
   // redirect() throws internally, so keep it outside any try/catch.
-  redirect(`/client/form/${token}`);
+  redirect("/thank-you");
 }
