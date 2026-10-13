@@ -8,6 +8,8 @@ import { prisma } from "@/lib/prisma"; // adjust to your prisma client path
 import { isRegistered } from "@/lib/auth-guard";
 import { checkIntakeAnswers } from "@/lib/prompts/intake-form-prompt";
 import type { PendingClient } from "@/lib/actions/first-time-contact";
+import { sendEmail } from "../emails/send";
+import { CompleteFormEmail } from "../emails/templates/complete-form";
 
 const schema = z.object({
   answers: z
@@ -37,6 +39,23 @@ export async function submitIntake(
   payload: unknown
 ): Promise<IntakeResult> {
   const session = await isRegistered(token);
+  
+  if (!session?.user?.id) {
+    return { error: "Unauthorized" };
+  }
+
+  const userId = session.user.id;
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      name: true,
+      email: true
+    }
+  });
+
+  if (!user || !user.email) {
+    return { error: "User record not found." };
+  }
 
   const pending = await redis.get<PendingClient>(`client:${token}`);
   if (!pending) return { error: "This link has expired." };
@@ -53,8 +72,8 @@ export async function submitIntake(
   }
 
   const profile = await prisma.clientProfile.upsert({
-    where: { userId: session.user.id },
-    create: { userId: session.user.id },
+    where: { userId },
+    create: { userId },
     update: {},
   });
 
@@ -68,5 +87,15 @@ export async function submitIntake(
 
   await redis.del(`client:${token}`);
 
-  redirect(`/client/${profile.id}`); // change to your real route
+  const firstName = user.name.split(" ")[0];
+  const formName = "The Baseline Audit";
+
+  await sendEmail({
+    to: user.email,
+    from: process.env.EMAIL_FROM as string,
+    subject: "Thank You!",
+    react: CompleteFormEmail({ firstName, formName })
+  });
+
+  redirect(`/dashboard`);
 }

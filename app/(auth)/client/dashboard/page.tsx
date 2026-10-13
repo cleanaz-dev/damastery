@@ -14,13 +14,13 @@ export default async function ClientDashboardPage() {
     }
 
     return (
-        // THE CENTRAL COLUMN: Centered, max-width, stone background, subtle side borders
-        <div className="min-h-screen max-w-5xl mx-auto bg-stone-50 sm:border-x sm:border-stone-200 text-stone-800 font-sans selection:bg-stone-300 shadow-[0_0_40px_-15px_rgba(0,0,0,0.05)]">
+        // THE CENTRAL COLUMN: Darker stone-200. Zero borders. Zero shadows.
+        <div className="min-h-screen max-w-5xl mx-auto bg-stone-200 text-stone-800 font-sans selection:bg-stone-400">
             
-            {/* Minimal Top Navigation */}
-            <nav className="w-full px-8 md:px-12 py-8 flex justify-between items-center border-b border-stone-200/50">
+            {/* Minimal Top Navigation - border removed completely */}
+            <nav className="w-full px-8 md:px-12 py-8 flex justify-between items-center">
                 <span className="font-serif text-lg tracking-wide text-stone-900">damastery.</span>
-                <button className="text-sm tracking-widest uppercase text-stone-400 hover:text-stone-800 transition-colors">
+                <button className="text-sm tracking-widest uppercase text-stone-500 hover:text-stone-900 transition-colors">
                     Log out
                 </button>
             </nav>
