@@ -42,7 +42,7 @@ export default function ClientDashboardView({
                     y={30}
                     className="space-y-8"
                 >
-                    <h2 className="text-xs font-semibold tracking-[0.2em] text-stone-400 uppercase">
+                    <h2 className="text-xs font-semibold tracking-[0.2em]  uppercase">
                         Upcoming Sessions
                     </h2>
 
@@ -98,7 +98,7 @@ export default function ClientDashboardView({
                     y={30}
                     className="space-y-8"
                 >
-                    <h2 className="text-xs font-semibold tracking-[0.2em] text-stone-400 uppercase">
+                    <h2 className="text-xs font-semibold tracking-[0.2em]  uppercase">
                         Action Items
                     </h2>
 
