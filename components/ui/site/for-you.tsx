@@ -26,7 +26,7 @@ export function ForYou() {
           <div className="absolute -left-5 -top-5 h-full w-full rounded-t-[12rem] border border-accent/40" />
 
           <img
-            src="/images/coach.webp"
+            src="/images/coach-02.png"
             alt="Damastery life coach, in soft natural light"
             className="relative aspect-[4/5] w-full rounded-t-[12rem] object-cover object-top grayscale-[15%]"
           />
