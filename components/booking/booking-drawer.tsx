@@ -1,6 +1,9 @@
 import { getBookableSlots } from "@/lib/hapio";
 import { BookingDrawerClient, HapioSlot } from "./book-drawer-client";
 
+// Hapio wants Y-m-d\TH:i:sP: no milliseconds, numeric offset instead of "Z"
+const toHapioDate = (d: Date) => d.toISOString().replace(/\.\d{3}Z$/, "+00:00");
+
 export async function BookingDrawer({
     children,
     resourceId,
@@ -8,7 +11,6 @@ export async function BookingDrawer({
     children: React.ReactElement;
     resourceId: string;
 }) {
-    // We fetch slots 14 days into the future server-side so they are instantly ready
     const today = new Date();
     const futureDate = new Date();
     futureDate.setDate(today.getDate() + 14);
@@ -18,13 +20,8 @@ export async function BookingDrawer({
     try {
         initialSlotsData = await getBookableSlots({
             resourceId,
-            from: today.toISOString(),
-            to: futureDate.toISOString(),
-        });
-        console.log("[BookingDrawer]", {
-            resourceId,
-            count: Array.isArray(initialSlotsData) ? initialSlotsData.length : null,
-            raw: initialSlotsData,
+            from: toHapioDate(today),
+            to: toHapioDate(futureDate),
         });
     } catch (error) {
         console.error("Failed to fetch bookable slots:", error);
