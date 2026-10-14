@@ -156,6 +156,8 @@ export async function createCustomerBooking(params: {
 
 // lib/hapio/index.ts
 
+// lib/hapio/index.ts
+
 export async function setupHapioProject(
   clinicName: string, 
   serviceName: string, 
@@ -210,41 +212,43 @@ export async function setupHapioProject(
   });
 
   // ---------------------------------------------------------
-  // NEW: 5. Create a Base Schedule (Requirement for Hapio)
+  // NEW: Exactly matching the Hapio documentation!
   // ---------------------------------------------------------
-  const schedule = await hapioFetch<{ id: string }>(`/recurring-schedules`, {
+  
+  // 5. Create Recurring Schedule DIRECTLY ON the Resource
+  // Generate today's date in YYYY-MM-DD format for the start_date
+  const todayDateStr = new Date().toISOString().split("T")[0];
+
+  const schedule = await hapioFetch<{ id: string }>(`/resources/${resource.id}/recurring-schedules`, {
     method: "POST",
     body: JSON.stringify({
-      name: "Standard Open Hours"
+      location_id: location.id,
+      start_date: todayDateStr
     })
   });
 
-  // NEW: 6. Add "Working Hours" to the schedule. 
-  // We will loop from Day 1 (Monday) to Day 7 (Sunday) and open them 
-  // from 00:00 to 23:59 so the calendar is fully flexible. 
-  // (You use your Admin Blocker to close off times you aren't working).
-  const daysOfWeek = [1, 2, 3, 4, 5, 6, 7];
+  // 6. Add Schedule Blocks to the Recurring Schedule
+  const daysOfWeek = [
+    "monday", 
+    "tuesday", 
+    "wednesday", 
+    "thursday", 
+    "friday", 
+    "saturday", 
+    "sunday"
+  ];
   
+  // Loop through each day and open availability 24/7 so we can bypass limits for blocks
   for (const day of daysOfWeek) {
-    await hapioFetch(`/recurring-schedule-blocks`, {
+    await hapioFetch(`/resources/${resource.id}/recurring-schedules/${schedule.id}/schedule-blocks`, {
       method: "POST",
       body: JSON.stringify({
-        recurring_schedule_id: schedule.id,
-        day_of_week: day,
-        starts_at: "00:00:00",
-        ends_at: "23:59:00"
+        weekday: day,
+        start_time: "00:00:00",
+        end_time: "23:59:00"
       })
     });
   }
-
-  // NEW: 7. Assign the Schedule to the Resource
-  await hapioFetch(`/resources/${resource.id}`, {
-    method: "PATCH",
-    body: JSON.stringify({
-      recurring_schedule_id: schedule.id
-    })
-  });
-  // ---------------------------------------------------------
 
   return {
     locationId: location.id,
