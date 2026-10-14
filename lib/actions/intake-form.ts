@@ -10,6 +10,7 @@ import { checkIntakeAnswers } from "@/lib/prompts/intake-form-prompt";
 import type { PendingClient } from "@/lib/actions/first-time-contact";
 import { sendEmail } from "../emails/send";
 import { CompleteFormEmail } from "../emails/templates/complete-form";
+import { error } from "console";
 
 const schema = z.object({
   answers: z
@@ -138,7 +139,17 @@ export async function submitIntake(
 
   // --- Confirmation email ---
   const firstName = user.name.split(" ")[0];
-  const formName = "The Baseline Audit";
+  const form = await prisma.form.findUnique({
+    where: {
+      id: "cmv7fl6nl0000m33sra794jqp"
+    }
+  })
+
+  if (!form || !form.title) {
+    return { error: "This form has no title" };
+  }
+
+  const formName = form?.title
 
   try {
     await sendEmail({

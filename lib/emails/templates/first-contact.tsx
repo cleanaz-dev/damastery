@@ -7,8 +7,6 @@ import {
   Heading,
   Text,
   Button,
-  Tailwind,
-  pixelBasedPreset,
   Section,
   Row,
   Column,
@@ -22,81 +20,151 @@ type FirstContactEmailProps = {
 };
 
 export function FirstContactEmail({ name, url }: FirstContactEmailProps) {
+  const firstName = name.split(" ")[0];
+
   return (
     <Html lang="en">
-      <Tailwind
-        config={{
-          presets: [pixelBasedPreset],
-          theme: {
-            extend: {
-              colors: {
-                primary: "#081F31",
-                "primary-foreground": "#F3EEE3",
-              },
-            },
-          },
-        }}
-      >
-        <Head />
-        <Preview>Next steps with Damastery</Preview>
-        <Body className="bg-zinc-50 font-sans text-zinc-900">
-          <Container className="mx-auto my-[40px] max-w-[480px] overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
-            {/* Header with logo */}
-            <Section className="bg-primary px-[32px] py-[24px]">
-              <Row>
-                <Column align="left">
-                  <Text className="m-0 text-[20px] font-bold text-primary-foreground">
-                    Damastery
-                  </Text>
-                </Column>
-                <Column align="left">
-                  <Img
-                    src={LOGO_URL}
-                    alt="Damastery"
-                    height="32"
-                    style={{ display: "block", marginLeft: "auto" }}
-                  />
-                </Column>
-              </Row>
+      <Head />
+      <Preview>Next steps with Damastery</Preview>
+      <Body style={styles.main}>
+        <Container style={styles.container}>
+          {/* Header */}
+          <Section style={styles.header}>
+            <Row>
+              <Column align="left" style={styles.verticalAlign}>
+                <Text style={styles.logoText}>Damastery</Text>
+              </Column>
+              <Column align="right" style={styles.verticalAlign}>
+                <Img
+                  src={LOGO_URL}
+                  alt="Damastery"
+                  height="32"
+                  style={styles.logoImage}
+                />
+              </Column>
+            </Row>
+          </Section>
+
+          {/* Content */}
+          <Section style={styles.content}>
+            <Heading style={styles.heading}>Let's get started</Heading>
+
+            <Text style={styles.paragraph}>
+              Hi {firstName}, thanks for reaching out! We're thrilled to connect
+              with you.
+            </Text>
+
+            <Text style={styles.paragraph}>
+              To take the next step and officially create your account, please
+              click the secure link below.
+            </Text>
+
+            <Section style={styles.buttonContainer}>
+              <Button href={url} style={styles.button}>
+                Complete your setup
+              </Button>
             </Section>
 
-            {/* Content */}
-            <Section className="px-[32px] py-[32px]">
-              <Heading className="m-0 mb-[16px] p-0 text-[24px] font-semibold tracking-tight text-zinc-950">
-                Let's get started
-              </Heading>
+            <Text style={styles.note}>
+              If you didn't request this link, you can safely ignore this email.
+            </Text>
+          </Section>
 
-              <Text className="text-[15px] leading-[24px] text-zinc-600">
-                Hi {name.split(" ")[0]}, thanks for reaching out! We're thrilled to connect with you.
-              </Text>
-
-              <Text className="mt-[16px] text-[15px] leading-[24px] text-zinc-600">
-                To take the next step and officially create your account, please click the secure link below.
-              </Text>
-
-              <Section className="my-[32px]">
-                <Button
-                  href={url}
-                  className="rounded-md bg-zinc-950 px-6 py-3 text-center text-[14px] font-medium text-white no-underline"
-                >
-                  Complete your setup
-                </Button>
-              </Section>
-
-              <Text className="m-0 text-[15px] leading-[24px] text-zinc-600">
-                If you didn't request this link, you can safely ignore this email.
-              </Text>
-            </Section>
-
-            {/* Footer */}
-            <Section className="bg-primary px-[32px] py-[20px]">
-              <Text className="m-0 text-[13px] leading-[24px] text-primary-foreground">
-                © 2026 Damastery. All rights reserved.
-              </Text>
-            </Section>
-          </Container>
-        </Body>
-      </Tailwind>
+          {/* Footer */}
+          <Section style={styles.footer}>
+            <Text style={styles.footerText}>
+              © 2026 Damastery. All rights reserved.
+            </Text>
+          </Section>
+        </Container>
+      </Body>
     </Html>
   );
 }
+
+// --- Premium Inline Styles ---
+
+const fontFamily =
+  "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Ubuntu, sans-serif";
+
+const styles = {
+  main: {
+    backgroundColor: "#F4F4F5",
+    fontFamily,
+    padding: "40px 0",
+  },
+  container: {
+    margin: "0 auto",
+    maxWidth: "480px",
+    backgroundColor: "#FFFFFF",
+    border: "1px solid #E4E4E7",
+    borderRadius: "12px",
+    overflow: "hidden",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.04)",
+  },
+  header: {
+    backgroundColor: "#081F31",
+    padding: "32px",
+  },
+  verticalAlign: {
+    verticalAlign: "middle",
+  },
+  logoText: {
+    margin: 0,
+    fontSize: "20px",
+    fontWeight: "700",
+    color: "#F3EEE3",
+    letterSpacing: "-0.5px",
+  },
+  logoImage: {
+    display: "block",
+    marginLeft: "auto",
+  },
+  content: {
+    padding: "40px 32px",
+  },
+  heading: {
+    margin: "0 0 20px",
+    fontSize: "24px",
+    fontWeight: "600",
+    color: "#09090B",
+    letterSpacing: "-0.5px",
+  },
+  paragraph: {
+    margin: "0 0 16px",
+    fontSize: "15px",
+    lineHeight: "24px",
+    color: "#52525B",
+  },
+  buttonContainer: {
+    margin: "32px 0",
+  },
+  button: {
+    backgroundColor: "#09090B",
+    color: "#FFFFFF",
+    fontSize: "14px",
+    fontWeight: "500",
+    textDecoration: "none",
+    textAlign: "center" as const,
+    padding: "14px 28px",
+    borderRadius: "6px",
+    display: "inline-block",
+  },
+  note: {
+    margin: 0,
+    fontSize: "15px",
+    lineHeight: "24px",
+    color: "#52525B",
+  },
+  footer: {
+    backgroundColor: "#081F31",
+    padding: "24px 32px",
+  },
+  footerText: {
+    margin: 0,
+    fontSize: "13px",
+    lineHeight: "24px",
+    color: "#F3EEE3",
+    opacity: 0.8,
+  },
+};
