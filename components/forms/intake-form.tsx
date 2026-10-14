@@ -4,7 +4,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
-// import { submitIntake } from "@/lib/actions/intake";
+import { submitIntake } from "@/lib/actions/intake-form";
 import { AckField } from "./parts/ack-field";
 import { ChoiceField } from "./parts/choice-field";
 import { FormHeader } from "./parts/form-header";
@@ -136,7 +136,7 @@ export function IntakeForm({ token, defaults }: Props) {
           open: { reach: reach.filter(Boolean), story, first, want },
           fit: { support, heavy, ack },
         };
-        // await submitIntake(token, payload);
+        await submitIntake(token, payload);
         console.log("submit intake", token, payload);
       } catch {
         setError("Something went wrong. Please try again.");
