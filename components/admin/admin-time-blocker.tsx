@@ -1,117 +1,241 @@
-// components/AdminTimeBlocker.tsx
+// components/admin/admin-time-blocker.tsx
 "use client";
 
 import { useState } from "react";
-import { addAdminBlock } from "@/app/(auth)/admin/schedule/actions";
+import { useRouter } from "next/navigation";
 
-export default function AdminTimeBlocker({ resourceId }: { resourceId: string }) {
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
+interface AdminTimeBlockerProps {
+  resourceId: string;
+}
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+const TIME_OPTIONS = [
+  "08:00", "08:30", "09:00", "09:30", "10:00", "10:30",
+  "11:00", "11:30", "12:00", "12:30", "13:00", "13:30",
+  "14:00", "14:30", "15:00", "15:30", "16:00", "16:30",
+  "17:00", "17:30", "18:00", "19:00", "20:00"
+];
+
+const CATEGORIES = [
+  { id: "busy", label: "Work Block / Busy" },
+  { id: "lunch", label: "Lunch Break" },
+  { id: "personal", label: "Personal / Out of Office" },
+  { id: "meeting", label: "Internal Meeting" },
+];
+
+export default function AdminTimeBlocker({ resourceId }: AdminTimeBlockerProps) {
+  const router = useRouter();
+
+  // Date selection (default today YYYY-MM-DD)
+  const [selectedDate, setSelectedDate] = useState(() => {
+    return new Date().toISOString().split("T")[0];
+  });
+  const [startTime, setStartTime] = useState("09:00");
+  const [endTime, setEndTime] = useState("10:00");
+  const [category, setCategory] = useState("busy");
+  const [note, setNote] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Quick Preset Helper
+  const applyPreset = (minutes: number) => {
+    const [startH, startM] = startTime.split(":").map(Number);
+    const dateObj = new Date();
+    dateObj.setHours(startH, startM, 0, 0);
+    dateObj.setMinutes(dateObj.getMinutes() + minutes);
+
+    const endH = String(dateObj.getHours()).padStart(2, "0");
+    const endM = String(dateObj.getMinutes()).padStart(2, "0");
+    setEndTime(`${endH}:${endM}`);
+  };
+
+  const setFullDay = () => {
+    setStartTime("08:00");
+    setEndTime("18:00");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setMessage(null);
+    setIsSubmitting(true);
+    setError(null);
 
-    const form = e.currentTarget;
-    const localStart = (form.elements.namedItem("startsAtLocal") as HTMLInputElement).value;
-    const localEnd = (form.elements.namedItem("endsAtLocal") as HTMLInputElement).value;
-    const category = (form.elements.namedItem("category") as HTMLSelectElement).value;
-    const note = (form.elements.namedItem("note") as HTMLInputElement).value;
+    // Build ISO timestamps without fractional milliseconds for Hapio
+    const fromDate = new Date(`${selectedDate}T${startTime}:00`);
+    const toDate = new Date(`${selectedDate}T${endTime}:00`);
 
-    if (!localStart || !localEnd) {
-      setMessage({ type: "error", text: "Please select both start and end times." });
-      setLoading(false);
+    if (toDate <= fromDate) {
+      setError("End time must be after the start time.");
+      setIsSubmitting(false);
       return;
     }
 
-    // Convert local HTML Datetime inputs to standard strict ISO-8601 Strings for Hapio API
-    const formData = new FormData();
-    formData.append("resourceId", resourceId);
-    formData.append("startsAt", new Date(localStart).toISOString());
-    formData.append("endsAt", new Date(localEnd).toISOString());
-    formData.append("category", category);
-    formData.append("note", note);
+    // Format Y-m-d\TH:i:sP (+00:00)
+    const fromStr = fromDate.toISOString().replace(/\.\d{3}Z$/, "+00:00");
+    const toStr = toDate.toISOString().replace(/\.\d{3}Z$/, "+00:00");
 
-    const response = await addAdminBlock(formData);
-    
-    if (response.success) {
-      setMessage({ type: "success", text: "Time blocked successfully!" });
-      form.reset();
-      // Optionally trigger a router.refresh() here to update your calendar view
-    } else {
-      setMessage({ type: "error", text: response.error || "Failed to block time." });
+    try {
+      const res = await fetch("/api/admin/schedule/block", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          resourceId,
+          from: fromStr,
+          to: toStr,
+          category,
+          note,
+        }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.message || "Failed to create block");
+      }
+
+      setNote("");
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred.");
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    setLoading(false);
   };
 
   return (
-    <div className="bg-white border shadow-sm rounded-xl p-6 max-w-md">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Block Out Admin Time</h2>
-      
-      {message && (
-        <div className={`p-3 rounded mb-4 text-sm font-medium ${
-          message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
-        }`}>
-          {message.text}
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
+        <div className="rounded-lg bg-red-50/80 border border-red-200/80 p-3.5 text-xs text-red-700">
+          {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
-          <input 
-            type="datetime-local" 
-            name="startsAtLocal" 
-            required 
-            className="w-full border-gray-300 rounded-lg shadow-sm px-4 py-2 border focus:ring-blue-500 focus:border-blue-500" 
+      {/* Date Input */}
+      <div>
+        <label className="block text-xs font-semibold tracking-wider uppercase text-neutral-500 mb-2">
+          Select Date
+        </label>
+        <div className="relative">
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="w-full h-11 px-3.5 rounded-xl border border-neutral-200 bg-white text-sm font-medium text-neutral-800 shadow-sm transition hover:border-neutral-300 focus:border-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900"
+            required
           />
         </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
-          <input 
-            type="datetime-local" 
-            name="endsAtLocal" 
-            required 
-            className="w-full border-gray-300 rounded-lg shadow-sm px-4 py-2 border focus:ring-blue-500 focus:border-blue-500" 
-          />
-        </div>
+      </div>
 
+      {/* Quick Duration Pills */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-xs font-semibold tracking-wider uppercase text-neutral-500">
+            Quick Duration
+          </label>
+        </div>
+        <div className="grid grid-cols-4 gap-2">
+          {[
+            { label: "30 min", action: () => applyPreset(30) },
+            { label: "1 hour", action: () => applyPreset(60) },
+            { label: "2 hours", action: () => applyPreset(120) },
+            { label: "Full Day", action: setFullDay },
+          ].map((preset) => (
+            <button
+              key={preset.label}
+              type="button"
+              onClick={preset.action}
+              className="py-1.5 text-xs font-medium rounded-lg border border-neutral-200 bg-neutral-50/60 hover:bg-neutral-100 text-neutral-700 transition active:scale-[0.98]"
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Time Selectors */}
+      <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-          <select 
-            name="category" 
-            required 
-            className="w-full border-gray-300 rounded-lg shadow-sm px-4 py-2 border bg-white focus:ring-blue-500 focus:border-blue-500"
+          <label className="block text-xs font-semibold tracking-wider uppercase text-neutral-500 mb-2">
+            Start Time
+          </label>
+          <select
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+            className="w-full h-11 px-3 rounded-xl border border-neutral-200 bg-white text-sm font-medium text-neutral-800 shadow-sm transition hover:border-neutral-300 focus:border-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900"
           >
-            <option value="work">Work Block / Busy</option>
-            <option value="meeting">Meeting</option>
-            <option value="personal">Personal Time</option>
-            <option value="maintenance">Maintenance</option>
-            <option value="other">Other</option>
+            {TIME_OPTIONS.map((time) => (
+              <option key={`start-${time}`} value={time}>
+                {time}
+              </option>
+            ))}
           </select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Internal Note (Optional)</label>
-          <input 
-            type="text" 
-            name="note" 
-            placeholder="e.g. Out for lunch, Doctor appt..."
-            className="w-full border-gray-300 rounded-lg shadow-sm px-4 py-2 border focus:ring-blue-500 focus:border-blue-500" 
-          />
+          <label className="block text-xs font-semibold tracking-wider uppercase text-neutral-500 mb-2">
+            End Time
+          </label>
+          <select
+            value={endTime}
+            onChange={(e) => setEndTime(e.target.value)}
+            className="w-full h-11 px-3 rounded-xl border border-neutral-200 bg-white text-sm font-medium text-neutral-800 shadow-sm transition hover:border-neutral-300 focus:border-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900"
+          >
+            {TIME_OPTIONS.map((time) => (
+              <option key={`end-${time}`} value={time}>
+                {time}
+              </option>
+            ))}
+          </select>
         </div>
+      </div>
 
-        <button 
-          type="submit" 
-          disabled={loading}
-          className="w-full bg-black hover:bg-gray-800 text-white font-medium py-2.5 rounded-lg transition-colors disabled:opacity-50"
+      {/* Category */}
+      <div>
+        <label className="block text-xs font-semibold tracking-wider uppercase text-neutral-500 mb-2">
+          Category
+        </label>
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="w-full h-11 px-3 rounded-xl border border-neutral-200 bg-white text-sm font-medium text-neutral-800 shadow-sm transition hover:border-neutral-300 focus:border-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900"
         >
-          {loading ? "Blocking Time..." : "Block Time"}
-        </button>
-      </form>
-    </div>
+          {CATEGORIES.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Internal Note */}
+      <div>
+        <label className="block text-xs font-semibold tracking-wider uppercase text-neutral-500 mb-2">
+          Internal Note <span className="font-normal text-neutral-400">(Optional)</span>
+        </label>
+        <input
+          type="text"
+          placeholder="e.g. Lunch break, Off-site client meeting..."
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          className="w-full h-11 px-3.5 rounded-xl border border-neutral-200 bg-white text-sm text-neutral-800 placeholder-neutral-400 shadow-sm transition hover:border-neutral-300 focus:border-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900"
+        />
+      </div>
+
+      {/* Primary Action Button */}
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="w-full h-11 flex items-center justify-center rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-medium tracking-wide shadow-sm transition active:scale-[0.99] disabled:opacity-50"
+      >
+        {isSubmitting ? (
+          <span className="inline-flex items-center gap-2">
+            <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+            </svg>
+            Blocking Slot...
+          </span>
+        ) : (
+          "Block Selected Time"
+        )}
+      </button>
+    </form>
   );
 }
