@@ -1,8 +1,9 @@
 // components/admin/admin-time-blocker.tsx
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   addDays,
   subDays,
@@ -116,7 +117,6 @@ function getCategoryConfig(categoryName?: string, isAdminBlock?: boolean) {
   );
 }
 
-// Extracts decimal hours (e.g., 13.5 for 1:30 PM) in America/Toronto time
 function getTorontoTimeParts(isoStr: string) {
   const d = new Date(isoStr);
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -146,6 +146,7 @@ export default function AdminTimeBlocker({
 }: AdminTimeBlockerProps) {
   const router = useRouter();
   const today = startOfToday();
+  const eightAmRef = useRef<HTMLDivElement | null>(null);
 
   const [viewMode, setViewMode] = useState<ViewMode>("week");
   const [currentDate, setCurrentDate] = useState<Date>(today);
@@ -162,6 +163,13 @@ export default function AdminTimeBlocker({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  // Auto-scroll the Shadcn ScrollArea to 8:00 AM when switching to 7-Day or Daily view
+  useEffect(() => {
+    if ((viewMode === "week" || viewMode === "day") && eightAmRef.current) {
+      eightAmRef.current.scrollIntoView({ block: "start" });
+    }
+  }, [viewMode]);
+
   // Group all bookings by YYYY-MM-DD in America/Toronto timezone
   const bookingsByDate = useMemo(() => {
     const map: Record<string, BookingItem[]> = {};
@@ -175,11 +183,15 @@ export default function AdminTimeBlocker({
     return map;
   }, [bookings]);
 
-  // Days for Month View
+  // Days for Month View (always 6 rows = 42 cells so height never jumps between months)
   const monthDays = useMemo(() => {
     const start = startOfWeek(startOfMonth(currentDate), { weekStartsOn: 0 });
     const end = endOfWeek(endOfMonth(currentDate), { weekStartsOn: 0 });
-    return eachDayOfInterval({ start, end });
+    const days = eachDayOfInterval({ start, end });
+    while (days.length < 42) {
+      days.push(addDays(days[days.length - 1], 1));
+    }
+    return days;
   }, [currentDate]);
 
   // Days for 7-Day Week View
@@ -192,7 +204,6 @@ export default function AdminTimeBlocker({
   const selectedDateKey = format(selectedDate, "yyyy-MM-dd");
   const selectedDayBookings = bookingsByDate[selectedDateKey] || [];
 
-  // Navigation handlers based on active viewMode
   const handlePrev = () => {
     if (viewMode === "month") setCurrentDate(subMonths(currentDate, 1));
     else if (viewMode === "week") setCurrentDate(subWeeks(currentDate, 1));
@@ -218,7 +229,6 @@ export default function AdminTimeBlocker({
     setCurrentDate(day);
   };
 
-  // Clicking an hour cell in 7-Day or Daily view selects that date + pre-fills start/end time
   const handleHourCellClick = (day: Date, hour: number) => {
     setSelectedDate(day);
     setCurrentDate(day);
@@ -326,7 +336,6 @@ export default function AdminTimeBlocker({
     }
   };
 
-  // Header Title based on active view
   const headerTitle = useMemo(() => {
     if (viewMode === "month") return format(currentDate, "MMMM yyyy");
     if (viewMode === "week") {
@@ -344,12 +353,12 @@ export default function AdminTimeBlocker({
     { label: "Next Mon", date: nextMonday(today) },
   ];
 
-  // Shared Renderer for 7-Day and Daily Hourly Grid
+  // Shared Renderer for 7-Day and Daily Hourly Grid with Shadcn ScrollArea
   const renderTimeGrid = (daysToRender: Date[]) => (
-    <div className="border border-neutral-200/80 rounded-xl overflow-hidden bg-white">
-      {/* Sticky Day Column Headers */}
+    <div className="w-full flex-1 flex flex-col border border-neutral-200/80 rounded-xl overflow-hidden bg-white min-h-0">
+      {/* Fixed Sticky Day Column Headers */}
       <div
-        className="grid border-b border-neutral-200 bg-neutral-50/70"
+        className="grid border-b border-neutral-200 bg-neutral-50/80 shrink-0"
         style={{
           gridTemplateColumns: `64px repeat(${daysToRender.length}, minmax(0, 1fr))`,
         }}
@@ -392,10 +401,10 @@ export default function AdminTimeBlocker({
         })}
       </div>
 
-      {/* Scrollable 24-Hour Timeline */}
-      <div className="max-h-[640px] overflow-y-auto relative">
+      {/* Shadcn ScrollArea wrapping the 24-Hour Grid so the page never stretches */}
+      <ScrollArea className="h-[570px] w-full">
         <div
-          className="grid relative"
+          className="grid relative w-full"
           style={{
             gridTemplateColumns: `64px repeat(${daysToRender.length}, minmax(0, 1fr))`,
             height: `${24 * HOUR_HEIGHT}px`,
@@ -406,6 +415,7 @@ export default function AdminTimeBlocker({
             {HOURS.map((h) => (
               <div
                 key={h}
+                ref={h === 8 ? eightAmRef : undefined}
                 style={{ height: `${HOUR_HEIGHT}px` }}
                 className="pr-2 pt-1 text-right text-[10px] font-mono text-neutral-400 border-b border-neutral-100"
               >
@@ -423,7 +433,7 @@ export default function AdminTimeBlocker({
             return (
               <div
                 key={dateKey}
-                className={`relative border-r last:border-r-0 border-neutral-200/70 ${
+                className={`relative border-r last:border-r-0 border-neutral-200/70 min-w-0 ${
                   isSelected ? "bg-neutral-50/40" : "bg-white"
                 }`}
               >
@@ -448,7 +458,6 @@ export default function AdminTimeBlocker({
                   const startParts = getTorontoTimeParts(ev.starts_at);
                   const endParts = getTorontoTimeParts(ev.ends_at);
 
-                  // Handle blocks that end at 23:59 or wrap
                   const endDecimal =
                     endParts.decimal <= startParts.decimal ? 24 : endParts.decimal;
                   const durationHours = Math.max(0.5, endDecimal - startParts.decimal);
@@ -502,28 +511,28 @@ export default function AdminTimeBlocker({
             );
           })}
         </div>
-      </div>
+      </ScrollArea>
     </div>
   );
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-      {/* LEFT / CENTER: MULTI-VIEW CALENDAR (MONTH / 7-DAY / DAILY) */}
-      <div className="lg:col-span-8 bg-white border border-neutral-200/80 rounded-2xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+    <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      {/* LEFT / CENTER: FIXED WIDTH & FIXED HEIGHT CALENDAR CARD */}
+      <div className="lg:col-span-8 w-full min-w-0 h-[760px] flex flex-col bg-white border border-neutral-200/80 rounded-2xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
         {/* Calendar Top Toolbar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 mb-5 border-b border-neutral-100">
-          <div>
-            <h2 className="text-lg font-semibold text-neutral-900 tracking-tight">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 mb-4 border-b border-neutral-100 shrink-0">
+          <div className="min-w-0">
+            <h2 className="text-lg font-semibold text-neutral-900 tracking-tight truncate">
               {headerTitle}
             </h2>
-            <p className="text-xs text-neutral-500 mt-0.5">
+            <p className="text-xs text-neutral-500 mt-0.5 truncate">
               {viewMode === "month"
                 ? "Click any day to inspect or add a time block."
-                : "Click any hour row on the timeline to pre-fill the time blocker."}
+                : "Scroll inside the calendar or click any hour slot to pre-fill."}
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
             {/* View Switcher: Month | 7 Day | Daily */}
             <div className="inline-flex items-center rounded-xl bg-neutral-100 p-1 border border-neutral-200/60">
               <button
@@ -600,10 +609,10 @@ export default function AdminTimeBlocker({
           </div>
         </div>
 
-        {/* VIEW 1: MONTH GRID */}
+        {/* VIEW 1: MONTH GRID (Fills exact same height as 7-Day & Daily views) */}
         {viewMode === "month" && (
-          <>
-            <div className="grid grid-cols-7 mb-2">
+          <div className="w-full flex-1 flex flex-col min-h-0">
+            <div className="grid grid-cols-7 mb-2 shrink-0">
               {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
                 <div
                   key={d}
@@ -614,7 +623,7 @@ export default function AdminTimeBlocker({
               ))}
             </div>
 
-            <div className="grid grid-cols-7 gap-1.5">
+            <div className="grid grid-cols-7 grid-rows-6 gap-1.5 flex-1 min-h-0">
               {monthDays.map((day) => {
                 const dateKey = format(day, "yyyy-MM-dd");
                 const dayEvents = bookingsByDate[dateKey] || [];
@@ -629,7 +638,7 @@ export default function AdminTimeBlocker({
                     type="button"
                     disabled={isPast}
                     onClick={() => handleSelectDate(day)}
-                    className={`min-h-[104px] p-2 rounded-xl border text-left transition-all flex flex-col justify-between relative ${
+                    className={`p-2 rounded-xl border text-left transition-all flex flex-col justify-between relative min-w-0 overflow-hidden ${
                       isSelected
                         ? "border-neutral-900 ring-2 ring-neutral-900/10 bg-neutral-50/70"
                         : isCurrentMonth
@@ -656,7 +665,7 @@ export default function AdminTimeBlocker({
                       )}
                     </div>
 
-                    <div className="mt-2 space-y-1 w-full overflow-hidden">
+                    <div className="mt-1 space-y-1 w-full overflow-hidden">
                       {dayEvents.slice(0, 2).map((ev) => {
                         const isAdmin = Boolean(ev.metadata?.is_admin_block);
                         const style = getCategoryConfig(ev.metadata?.category, isAdmin);
@@ -674,7 +683,7 @@ export default function AdminTimeBlocker({
                         );
                       })}
                       {dayEvents.length > 2 && (
-                        <div className="text-[10px] font-medium text-neutral-500 pl-1">
+                        <div className="text-[10px] font-medium text-neutral-500 pl-1 truncate">
                           +{dayEvents.length - 2} more
                         </div>
                       )}
@@ -683,7 +692,7 @@ export default function AdminTimeBlocker({
                 );
               })}
             </div>
-          </>
+          </div>
         )}
 
         {/* VIEW 2: 7-DAY HOURLY SCHEDULE */}
@@ -693,8 +702,8 @@ export default function AdminTimeBlocker({
         {viewMode === "day" && renderTimeGrid([selectedDate])}
       </div>
 
-      {/* RIGHT COLUMN: SELECTED DAY INSPECTOR (WITH DELETE) + TIME BLOCKER */}
-      <div className="lg:col-span-4 space-y-6">
+      {/* RIGHT COLUMN: SELECTED DAY INSPECTOR + TIME BLOCKER */}
+      <div className="lg:col-span-4 w-full min-w-0">
         <div className="bg-white border border-neutral-200/80 rounded-2xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.03)] space-y-6">
           {/* Selected Date Summary + Existing Blocks List */}
           <div className="space-y-3 pb-5 border-b border-neutral-100">
@@ -734,60 +743,62 @@ export default function AdminTimeBlocker({
               })}
             </div>
 
-            {/* Active Blocks on Selected Day with Delete Button */}
+            {/* Active Blocks on Selected Day with Shadcn ScrollArea */}
             {selectedDayBookings.length > 0 ? (
-              <div className="space-y-2 pt-2 max-h-48 overflow-y-auto pr-1">
-                {selectedDayBookings.map((b) => {
-                  const isAdmin = Boolean(b.metadata?.is_admin_block);
-                  const style = getCategoryConfig(b.metadata?.category, isAdmin);
-                  const startParts = getTorontoTimeParts(b.starts_at);
-                  const endParts = getTorontoTimeParts(b.ends_at);
+              <ScrollArea className="h-36 w-full pr-3 pt-1">
+                <div className="space-y-2">
+                  {selectedDayBookings.map((b) => {
+                    const isAdmin = Boolean(b.metadata?.is_admin_block);
+                    const style = getCategoryConfig(b.metadata?.category, isAdmin);
+                    const startParts = getTorontoTimeParts(b.starts_at);
+                    const endParts = getTorontoTimeParts(b.ends_at);
 
-                  return (
-                    <div
-                      key={b.id}
-                      className="p-2.5 rounded-xl border border-neutral-200/80 bg-neutral-50/60 flex items-center justify-between gap-2"
-                    >
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className={`w-2 h-2 rounded-full shrink-0 ${style.dot}`} />
-                          <p className="text-xs font-semibold text-neutral-900 truncate">
-                            {style.label}
+                    return (
+                      <div
+                        key={b.id}
+                        className="p-2.5 rounded-xl border border-neutral-200/80 bg-neutral-50/60 flex items-center justify-between gap-2"
+                      >
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className={`w-2 h-2 rounded-full shrink-0 ${style.dot}`} />
+                            <p className="text-xs font-semibold text-neutral-900 truncate">
+                              {style.label}
+                            </p>
+                          </div>
+                          <p className="text-[11px] text-neutral-500 font-mono pl-3.5">
+                            {startParts.formatted} – {endParts.formatted}
                           </p>
+                          {b.metadata?.note && (
+                            <p className="text-[11px] text-neutral-500 italic pl-3.5 truncate">
+                              "{b.metadata.note}"
+                            </p>
+                          )}
                         </div>
-                        <p className="text-[11px] text-neutral-500 font-mono pl-3.5">
-                          {startParts.formatted} – {endParts.formatted}
-                        </p>
-                        {b.metadata?.note && (
-                          <p className="text-[11px] text-neutral-500 italic pl-3.5 truncate">
-                            "{b.metadata.note}"
-                          </p>
+
+                        {isAdmin ? (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteBlock(b.id)}
+                            disabled={deletingId === b.id}
+                            className="p-2 rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100 transition shrink-0"
+                            title="Delete time block"
+                          >
+                            {deletingId === b.id ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin text-red-600" />
+                            ) : (
+                              <Trash2 className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        ) : (
+                          <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded border bg-emerald-50 text-emerald-800 border-emerald-200 shrink-0">
+                            Client
+                          </span>
                         )}
                       </div>
-
-                      {isAdmin ? (
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteBlock(b.id)}
-                          disabled={deletingId === b.id}
-                          className="p-2 rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100 transition shrink-0"
-                          title="Delete time block"
-                        >
-                          {deletingId === b.id ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin text-red-600" />
-                          ) : (
-                            <Trash2 className="w-3.5 h-3.5" />
-                          )}
-                        </button>
-                      ) : (
-                        <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded border bg-emerald-50 text-emerald-800 border-emerald-200 shrink-0">
-                          Client
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
             ) : (
               <div className="py-3 px-3.5 rounded-xl bg-emerald-50/50 border border-emerald-200/50 text-xs text-emerald-800 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
