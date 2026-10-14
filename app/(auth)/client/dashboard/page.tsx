@@ -1,4 +1,3 @@
-// app/dashboard/page.tsx
 import { getClientData } from "@/lib/actions/get-client-data";
 import { requireUser } from "@/lib/auth-guard";
 import ClientDashboardView from "@/components/client/client-dashboard-view";
@@ -17,23 +16,5 @@ export default async function ClientDashboardPage() {
     );
   }
 
-  return (
-    // THE CENTRAL COLUMN: Darker stone-200. Zero borders. Zero shadows.
-    <div className="min-h-screen max-w-5xl mx-auto bg-stone-100 text-stone-800 font-sans selection:bg-stone-400">
-      {/* Minimal Top Navigation - border removed completely */}
-      <nav className="w-full px-8 md:px-12 py-8 flex justify-between items-center">
-        <span className="font-serif text-lg tracking-wide text-stone-900">
-          damastery.
-        </span>
-        <button className="px-5 py-2 text-xs font-semibold tracking-wider text-stone-600 uppercase bg-white border border-stone-200 rounded-full shadow-sm hover:bg-stone-50 hover:text-stone-900 transition-all">
-          Log Out
-        </button>
-      </nav>
-
-      {/* Dashboard Content */}
-      <main className="w-full max-w-4xl mx-auto px-8 md:px-12 py-16">
-        <ClientDashboardView clientData={clientData} />
-      </main>
-    </div>
-  );
+  return <ClientDashboardView clientData={clientData} />;
 }
