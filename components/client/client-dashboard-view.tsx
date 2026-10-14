@@ -11,8 +11,10 @@ const TZ = "America/Toronto"; // or a per-client timezone
 
 export default function ClientDashboardView({
     clientData: data,
+    bookingAction,
 }: {
     clientData: ClientData;
+    bookingAction: React.ReactNode;
 }) {
     const router = useRouter();
     const [loggingOut, setLoggingOut] = useState(false);
@@ -87,46 +89,47 @@ export default function ClientDashboardView({
 
                             <div className="space-y-2">
                                 {data.bookings.length > 0 ? (
-                                    data.bookings.map((booking) => (
-                                        <div
-                                            key={booking.id}
-                                            className="group border-b border-stone-200 py-4 flex items-center justify-between hover:border-stone-400 transition-colors"
-                                        >
-                                            <div>
-                                                <p className="font-medium text-stone-900 text-lg">
-                                                    {new Intl.DateTimeFormat("en-US", {
-                                                        weekday: "long",
-                                                        month: "long",
-                                                        day: "numeric",
-                                                        timeZone: TZ,
-                                                    }).format(booking.startsAt)}
-                                                </p>
-                                                <p className="text-stone-500 mt-1 italic">
-                                                    {new Intl.DateTimeFormat("en-US", {
-                                                        hour: "numeric",
-                                                        minute: "2-digit",
-                                                        timeZoneName: "short",
-                                                        timeZone: TZ,
-                                                    }).format(booking.startsAt)}
-                                                    {" • "}
-                                                    <span className="capitalize">
-                                                        {booking.status.toLowerCase()}
-                                                    </span>
-                                                </p>
+                                    <>
+                                        {data.bookings.map((booking) => (
+                                            <div
+                                                key={booking.id}
+                                                className="group border-b border-stone-200 py-4 flex items-center justify-between hover:border-stone-400 transition-colors"
+                                            >
+                                                <div>
+                                                    <p className="font-medium text-stone-900 text-lg">
+                                                        {new Intl.DateTimeFormat("en-US", {
+                                                            weekday: "long",
+                                                            month: "long",
+                                                            day: "numeric",
+                                                            timeZone: TZ,
+                                                        }).format(booking.startsAt)}
+                                                    </p>
+                                                    <p className="text-stone-500 mt-1 italic">
+                                                        {new Intl.DateTimeFormat("en-US", {
+                                                            hour: "numeric",
+                                                            minute: "2-digit",
+                                                            timeZoneName: "short",
+                                                            timeZone: TZ,
+                                                        }).format(booking.startsAt)}
+                                                        {" • "}
+                                                        <span className="capitalize">
+                                                            {booking.status.toLowerCase()}
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                                <button className="text-stone-300 group-hover:text-stone-900 transition-colors">
+                                                    <ArrowRight className="w-5 h-5" strokeWidth={1.5} />
+                                                </button>
                                             </div>
-                                            <button className="text-stone-300 group-hover:text-stone-900 transition-colors">
-                                                <ArrowRight className="w-5 h-5" strokeWidth={1.5} />
-                                            </button>
-                                        </div>
-                                    ))
+                                        ))}
+                                        <div className="pt-4">{bookingAction}</div>
+                                    </>
                                 ) : (
                                     <div className="py-4">
                                         <p className="text-stone-500 italic">
                                             You currently have no upcoming sessions.
                                         </p>
-                                        <button className="mt-4 text-sm font-medium text-stone-900 border-b border-stone-900 pb-0.5 hover:text-stone-500 hover:border-stone-500 transition-all">
-                                            Book your next session
-                                        </button>
+                                        <div className="mt-4">{bookingAction}</div>
                                     </div>
                                 )}
                             </div>
