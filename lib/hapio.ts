@@ -159,10 +159,6 @@ export async function createCustomerBooking(params: {
 }
 
 
-// lib/hapio/index.ts
-
-// lib/hapio/index.ts
-
 export async function setupHapioProject(
   clinicName: string, 
   serviceName: string, 
