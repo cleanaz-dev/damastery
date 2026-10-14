@@ -118,9 +118,7 @@ export async function bookMeetingAction(
     joinUrl = zoom.joinUrl;
     await prisma.booking.update({
       where: { id: booking.id },
-      data: {
-        
-        zoomMeetingId: zoom.id, zoomJoinUrl: zoom.joinUrl },
+      data: { zoomMeetingId: zoom.id, zoomJoinUrl: zoom.joinUrl },
     });
   } catch (err: any) {
     console.error("Zoom meeting failed:", err?.message);
