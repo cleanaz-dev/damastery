@@ -121,6 +121,9 @@ model Booking {
 
   status BookingStatus @default(PENDING)
 
+  zoomMeetingId String?
+  zoomJoinUrl   String?
+
   startsAt DateTime
   endsAt   DateTime
 
