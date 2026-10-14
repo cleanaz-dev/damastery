@@ -1,4 +1,12 @@
-import { Settings, Users, LayoutDashboard, Calendar, Box, Newspaper } from "lucide-react";
+import {
+  Settings,
+  Users,
+  LayoutDashboard,
+  Calendar,
+  Box,
+  Newspaper,
+  Form,
+} from "lucide-react";
 
 import {
   Sidebar,
@@ -15,12 +23,14 @@ import {
 } from "@/components/ui/sidebar";
 
 import { NavUser } from "./ nav-user";
+import { title } from "process";
 const navItems = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
   { title: "Clients", url: "/admin/clients", icon: Users },
   { title: "Schedule", url: "/admin/schedule", icon: Calendar },
   { title: "Products", url: "/admin/products", icon: Box },
-  { title: "Blogs", url: "/admin/blogs", icon: Newspaper }
+  { title: "Blogs", url: "/admin/blogs", icon: Newspaper },
+  { title: "Forms", url: "/admin/forms", icon: Form },
 ];
 
 export function AdminSidebar() {
