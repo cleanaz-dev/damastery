@@ -6,8 +6,10 @@ const HAPIO_KEY = process.env.HAPIO_API_KEY!;
 export type AdminBlockCategory = "work" | "personal" | "meeting" | "maintenance" | "other";
 
 // Hardcoded — single location, single service for the whole app
-export const HAPIO_LOCATION_ID = "705cc639-ed36-4169-bf2b-cab8be5c7f93";
-export const HAPIO_SERVICE_ID = "d8fcf10f-fef7-4f23-ab16-b0b621fa37c8";
+export const HAPIO_LOCATION_ID = process.env.HAPIO_LOCATION_ID!
+export const HAPIO_SERVICE_ID = process.env.HAPIO_SERVICE_ID!
+
+
 
 async function hapioFetch<T>(
   path: string,
