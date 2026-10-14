@@ -52,7 +52,7 @@ export default async function AdminSchedulePage() {
   const bookings = response.data || [];
 
   return (
-    <div className="min-h-screen py-10 px-6 lg:px-10 max-w-[1440px] mx-auto space-y-8">
+    <div className="min-h-screen py-4 px-6 lg:px-10 max-w-[1440px] mx-auto space-y-8">
       {/* Header section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-neutral-200/70">
         <div>
