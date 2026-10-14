@@ -15,7 +15,7 @@ export function FormSection({
   return (
     <section className="bg-white border border-slate-200 shadow-sm rounded-md overflow-hidden">
       {/* UPDATED: bg-slate-900 for high contrast */}
-      <div className="bg-slate-900 px-6 py-5 flex flex-col md:flex-row md:items-center gap-5">
+      <div className="bg-primary px-6 py-5 flex flex-col md:flex-row md:items-center gap-5">
         <span className="bg-white text-slate-900 font-bold px-3 py-1 text-sm md:text-base rounded-sm shadow-sm flex-shrink-0">
           {step}
         </span>
