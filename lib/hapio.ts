@@ -29,6 +29,11 @@ async function hapioFetch<T>(
     throw new Error(`Hapio API error ${res.status}: ${body}`);
   }
 
+  // Handle 204 No Content (returned by DELETE /bookings/:id)
+  if (res.status === 204) {
+    return {} as T;
+  }
+
   return res.json() as Promise<T>;
 }
 

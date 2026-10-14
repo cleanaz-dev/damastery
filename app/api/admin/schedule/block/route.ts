@@ -1,6 +1,6 @@
 // app/api/admin/schedule/block/route.ts
 import { NextResponse } from "next/server";
-import { createAdminBooking, AdminBlockCategory } from "@/lib/hapio";
+import { createAdminBooking, AdminBlockCategory, cancelHapioBooking } from "@/lib/hapio";
 
 export async function POST(req: Request) {
   try {
@@ -52,6 +52,28 @@ export async function POST(req: Request) {
     // Return a 500 error if something fails during the Hapio fetch
     return NextResponse.json(
       { message: error.message || "Failed to block out time in the schedule." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const bookingId = searchParams.get("id");
+
+    if (!bookingId) {
+      return NextResponse.json(
+        { message: "Missing booking ID" },
+        { status: 400 }
+      );
+    }
+
+    await cancelHapioBooking(bookingId);
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    return NextResponse.json(
+      { message: err.message || "Failed to delete time block." },
       { status: 500 }
     );
   }
