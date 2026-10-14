@@ -43,7 +43,7 @@ export default function ClientDashboardView({
 
     return (
         // THE CENTRAL COLUMN: Zero borders. Zero shadows.
-        <div className="min-h-screen max-w-5xl mx-auto bg-stone-100 text-stone-800 font-sans selection:bg-stone-400">
+        <div className="min-h-screen max-w-5xl mx-auto bg-stone-200 text-stone-800 font-sans selection:bg-stone-400">
             {/* Minimal Top Navigation */}
             <nav className="w-full px-8 md:px-12 py-8 flex justify-between items-center">
                 <span className="font-serif text-lg tracking-wide text-stone-900">
