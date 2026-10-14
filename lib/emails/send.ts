@@ -10,6 +10,7 @@ type SendEmailParams = {
   react: ReactElement;
   from?: string;
   replyTo?: string | string[];
+  attachments?: { filename: string; content: string | Buffer }[];
 };
 
 export async function sendEmail({
@@ -18,6 +19,7 @@ export async function sendEmail({
   react,
   from = DEFAULT_FROM,
   replyTo,
+  attachments,
 }: SendEmailParams) {
   const { data, error } = await resend.emails.send({
     from,
@@ -25,6 +27,7 @@ export async function sendEmail({
     subject,
     react,
     replyTo,
+    attachments,
   });
 
   if (error) {

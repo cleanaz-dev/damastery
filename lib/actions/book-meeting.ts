@@ -4,6 +4,8 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createCustomerBooking, cancelHapioBooking } from "@/lib/hapio";
+import { createZoomMeeting } from "@/lib/zoom";
+import { buildIcs } from "@/lib/ics";
 import { sendEmail } from "../emails/send";
 import {
   MeetingBookedEmail,
@@ -99,14 +101,31 @@ export async function bookMeetingAction(
     return { success: false, error: "Something went wrong. Please try again." };
   }
 
-  // 6. Emails. A failed email must not fail the booking, and one failing
-  //    must not stop the other, so they send independently.
+  // 6. Zoom meeting. A failure here must not cost us the booking.
   const time = formatWhen(booking.startsAt);
   const minutes = Math.round(
     (booking.endsAt.getTime() - booking.startsAt.getTime()) / 60000,
   );
   const duration = `${minutes} minutes`;
 
+  let joinUrl: string | undefined;
+  try {
+    const zoom = await createZoomMeeting({
+      topic: `Session with ${user.name}`,
+      startsAt: booking.startsAt,
+      durationMinutes: minutes,
+    });
+    joinUrl = zoom.joinUrl;
+    await prisma.booking.update({
+      where: { id: booking.id },
+      data: { zoomMeetingId: zoom.id, zoomJoinUrl: zoom.joinUrl },
+    });
+  } catch (err: any) {
+    console.error("Zoom meeting failed:", err?.message);
+  }
+
+  // 7. Emails. A failed email must not fail the booking, and one failing
+  //    must not stop the other, so they send independently.
   const results = await Promise.allSettled([
     sendEmail({
       to: user.email,
@@ -115,7 +134,22 @@ export async function bookMeetingAction(
         firstName: user.name.split(" ")[0],
         time,
         duration,
+        joinUrl,
       }),
+      attachments: [
+        {
+          filename: "session.ics",
+          content: Buffer.from(
+            buildIcs({
+              uid: booking.id,
+              title: "Session with Dwayne",
+              startsAt: booking.startsAt,
+              endsAt: booking.endsAt,
+              joinUrl,
+            }),
+          ),
+        },
+      ],
     }),
     sendEmail({
       to: process.env.EMAIL_TO!,
@@ -125,6 +159,7 @@ export async function bookMeetingAction(
         clientEmail: user.email,
         time,
         duration,
+        joinUrl,
       }),
     }),
   ]);

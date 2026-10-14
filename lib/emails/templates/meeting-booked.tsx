@@ -68,9 +68,15 @@ type MeetingBookedProps = {
   firstName: string;
   time: string; // preformatted, e.g. "Thursday, October 15 at 2:00 PM EDT"
   duration: string; // e.g. "60 minutes"
+  joinUrl?: string; // undefined if the Zoom meeting couldn't be created
 };
 
-export function MeetingBookedEmail({ firstName, time, duration }: MeetingBookedProps) {
+export function MeetingBookedEmail({
+  firstName,
+  time,
+  duration,
+  joinUrl,
+}: MeetingBookedProps) {
   return (
     <Html>
       <Head />
@@ -92,7 +98,19 @@ export function MeetingBookedEmail({ firstName, time, duration }: MeetingBookedP
               ]}
             />
 
-            <Section style={styles.buttonContainer}>
+            {joinUrl ? (
+              <Section style={styles.buttonContainer}>
+                <Button href={joinUrl} style={styles.button}>
+                  Join Zoom meeting
+                </Button>
+              </Section>
+            ) : (
+              <Text style={{ ...styles.paragraph, marginTop: "24px" }}>
+                Your Zoom link will be sent to you shortly.
+              </Text>
+            )}
+
+            <Section style={joinUrl ? { margin: "0 0 32px" } : styles.buttonContainer}>
               <Button href={clientPortalUrl} style={styles.button}>
                 View in your portal
               </Button>
@@ -113,6 +131,7 @@ type AdminMeetingBookedProps = {
   clientEmail: string;
   time: string;
   duration: string;
+  joinUrl?: string;
 };
 
 export function MeetingBookedAdminEmail({
@@ -120,6 +139,7 @@ export function MeetingBookedAdminEmail({
   clientEmail,
   time,
   duration,
+  joinUrl,
 }: AdminMeetingBookedProps) {
   return (
     <Html>
@@ -142,8 +162,20 @@ export function MeetingBookedAdminEmail({
                 { label: "Email", value: clientEmail },
                 { label: "When", value: time },
                 { label: "Length", value: duration },
+                {
+                  label: "Zoom",
+                  value: joinUrl ?? "Link not created, check logs",
+                },
               ]}
             />
+
+            {joinUrl && (
+              <Section style={styles.buttonContainer}>
+                <Button href={joinUrl} style={styles.button}>
+                  Open Zoom meeting
+                </Button>
+              </Section>
+            )}
           </Section>
           <Footer />
         </Container>
