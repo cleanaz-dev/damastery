@@ -123,7 +123,7 @@ export async function bookMeetingAction(
   } catch (err: any) {
     console.error("Zoom meeting failed:", err?.message);
   }
-
+  console.log("Created Zoom....")
   // 7. Emails. A failed email must not fail the booking, and one failing
   //    must not stop the other, so they send independently.
   const results = await Promise.allSettled([
@@ -163,6 +163,8 @@ export async function bookMeetingAction(
       }),
     }),
   ]);
+
+  console.log("Sending Emails....")
 
   results.forEach((r, i) => {
     if (r.status === "rejected") {
