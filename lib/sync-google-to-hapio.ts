@@ -1,6 +1,6 @@
 // lib/sync-google-to-hapio.ts
 import { getGoogleCalendarEvents, stampGoogleEventWithHapioId } from "./google-calendar";
-import { getHapioBookings, createAdminBooking, cancelHapioBooking } from "./hapio";
+import { getHapioBookings, createAdminBooking } from "./hapio";
 
 export async function syncGoogleCalendarToHapio(resourceId: string, from: string, to: string) {
   try {
@@ -12,24 +12,21 @@ export async function syncGoogleCalendarToHapio(resourceId: string, from: string
 
     const hapioBookings = hapioRes.data || [];
 
-    // Map of existing Hapio admin blocks by their Google event link or time
-    const syncedHapioIds = new Set(
-      hapioBookings
-        .filter((b) => b.metadata?.is_admin_block)
-        .map((b) => b.metadata?.googleEventId || b.id)
-    );
-
     for (const gEvent of googleEvents) {
-      // If this Google event was created by our app originally, skip it (avoid infinite loops)
+      // Skip events our app created originally (avoid infinite loops)
       if (gEvent.hapioBookingId) continue;
 
-      // Check if we already synced this Google event into Hapio
+      // Skip if we already synced this Google event into Hapio
       const alreadySynced = hapioBookings.some(
-        (b) => b.starts_at === gEvent.startsAt && b.ends_at === gEvent.endsAt && b.metadata?.is_admin_block
+        (b) =>
+          b.starts_at === gEvent.startsAt &&
+          b.ends_at === gEvent.endsAt &&
+          b.metadata?.is_admin_block
       );
+      if (alreadySynced) continue;
 
-      if (!alreadySynced) {
-        // 2. Create the block in Hapio so customer availability closes immediately!
+      try {
+        // 2. Create the block in Hapio so customer availability closes immediately
         const newHapioBlock = await createAdminBooking({
           resourceId,
           startsAt: gEvent.startsAt,
@@ -40,9 +37,13 @@ export async function syncGoogleCalendarToHapio(resourceId: string, from: string
 
         // 3. Stamp the Google Calendar event with the Hapio ID
         await stampGoogleEventWithHapioId(gEvent.googleEventId, newHapioBlock.id);
+      } catch (err: any) {
+        // 422 = outside the resource's open schedule, nothing to block
+        if (String(err?.message).includes("422")) continue;
+        console.error("Failed to sync event", gEvent.googleEventId, err?.message);
       }
     }
-  } catch (err) {
-    console.error("Error syncing Google Calendar to Hapio:", err);
+  } catch (err: any) {
+    console.error("Error syncing Google Calendar to Hapio:", err?.code, err?.message);
   }
 }
