@@ -1,5 +1,5 @@
 // lib/google-calendar.ts
-import { google } from "googleapis";
+import { google, calendar_v3 } from "googleapis";
 
 const CALENDAR_ID = process.env.DWAYNE_GOOGLE_CALENDAR_ID!;
 
@@ -10,26 +10,39 @@ function getCalendarClient() {
       private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
     },
     scopes: ["https://www.googleapis.com/auth/calendar"],
+    clientOptions: { subject: CALENDAR_ID }, 
   });
-
   return google.calendar({ version: "v3", auth });
 }
 
-// 1. Fetch events from Dwayne's Google Calendar
 export async function getGoogleCalendarEvents(from: string, to: string) {
   if (!CALENDAR_ID || !process.env.GOOGLE_CLIENT_EMAIL) return [];
   const calendar = getCalendarClient();
 
-  const res = await calendar.events.list({
-    calendarId: CALENDAR_ID,
-    timeMin: new Date(from).toISOString(),
-    timeMax: new Date(to).toISOString(),
-    singleEvents: true,
-    orderBy: "startTime",
-  });
+  const items: calendar_v3.Schema$Event[] = [];
+  let pageToken: string | undefined;
+  do {
+    const res = await calendar.events.list({
+      calendarId: CALENDAR_ID,
+      timeMin: new Date(from).toISOString(),
+      timeMax: new Date(to).toISOString(),
+      singleEvents: true,
+      orderBy: "startTime",
+      maxResults: 250,
+      pageToken,
+    });
+    items.push(...(res.data.items ?? []));
+    pageToken = res.data.nextPageToken ?? undefined;
+  } while (pageToken);
 
-  return (res.data.items || [])
-    .filter((ev) => ev.start?.dateTime && ev.end?.dateTime) // Ignore all-day banners for now
+  return items
+    .filter(
+      (ev) =>
+        ev.start?.dateTime &&
+        ev.end?.dateTime &&
+        ev.status !== "cancelled" &&
+        ev.transparency !== "transparent"
+    )
     .map((ev) => ({
       googleEventId: ev.id!,
       summary: ev.summary || "Google Calendar Event",
