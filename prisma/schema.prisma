@@ -24,31 +24,30 @@ enum BookingStatus {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String   @id @default(cuid())
   name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
+  email         String   @unique
+  emailVerified Boolean  @default(false)
   image         String?
-  role          UserRole  @default(CLIENT)
-
+  role          UserRole @default(CLIENT)
 
   // Custom fields from your auth config
-  avatarUrl     String?
-  phone         String?
+  avatarUrl String?
+  phone     String?
 
   // Admin plugin fields
-  banned        Boolean?  @default(false)
-  banReason     String?
-  banExpires    DateTime?
+  banned     Boolean?  @default(false)
+  banReason  String?
+  banExpires DateTime?
 
   sessions Session[]
   accounts Account[]
   bookings Booking[]
 
-  profile     ClientProfile?
+  profile ClientProfile?
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ClientProfile {
@@ -137,6 +136,18 @@ model FormSubmission {
   data     Json
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  form      Form?    @relation(fields: [formId], references: [id])
+  formId    String?
 
   @@index([profileId])
+}
+
+model Form {
+  id          String           @id @default(cuid())
+  title       String
+  submissions FormSubmission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
