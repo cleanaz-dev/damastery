@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { bookSessionAction } from "@/lib/actions/book-session";
+
 import { Button } from "@/components/ui/button";
 import {
     Drawer,
@@ -15,6 +15,7 @@ import {
     DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Loader2 } from "lucide-react";
+import { bookMeetingAction } from "@/lib/actions/book-meeting";
 
 const TZ = "America/Toronto";
 
@@ -57,7 +58,7 @@ export function BookingDrawerClient({
         if (!selectedSlot) return;
         setIsSubmitting(true);
 
-        const res = await bookSessionAction(
+        const res = await bookMeetingAction(
             resourceId,
             selectedSlot.starts_at,
             selectedSlot.ends_at

@@ -30,7 +30,7 @@ function formatWhen(d: Date) {
   return `${date} at ${clock}`;
 }
 
-export async function bookSessionAction(
+export async function bookMeetingAction(
   resourceId: string,
   startsAt: string,
   endsAt: string,
