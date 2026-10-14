@@ -170,5 +170,5 @@ export async function submitIntake(
   });
 
   // redirect() works by throwing, so keep it outside any try/catch
-  redirect(`/dashboard`);
+  redirect(`/client/dashboard`);
 }

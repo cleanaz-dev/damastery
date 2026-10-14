@@ -1,7 +1,19 @@
+// app/(auth)/admin/schedule/page.tsx
+
+export const dynamic = "force-dynamic";
+
 import AdminTimeBlocker from "@/components/admin/admin-time-blocker";
 import { getHapioBookings } from "@/lib/hapio";
 import Link from "next/link";
-import { prisma } from "@/lib/prisma"; // <-- Make sure this points to your instantiated Prisma client
+import { prisma } from "@/lib/prisma";
+
+/**
+ * Formats a JavaScript Date into PHP's Y-m-d\TH:i:sP format
+ * e.g., "2026-10-14T12:00:00+00:00" without millisecond fractions
+ */
+function toHapioDateString(date: Date): string {
+  return date.toISOString().replace(/\.\d{3}Z$/, "+00:00");
+}
 
 export default async function AdminSchedulePage() {
   // 1. Fetch the provider and their Hapio Resource ID from your DB
@@ -26,11 +38,11 @@ export default async function AdminSchedulePage() {
   const nextWeek = new Date();
   nextWeek.setDate(today.getDate() + 7);
 
-  // 3. Fetch the bookings using the DB-provided ID
+  // 3. Fetch the bookings using the DB-provided ID with formatted date parameters
   const response = await getHapioBookings({
     resourceId: ADMIN_RESOURCE_ID,
-    from: today.toISOString(),
-    to: nextWeek.toISOString(),
+    from: toHapioDateString(today),
+    to: toHapioDateString(nextWeek),
   });
 
   const bookings = response.data || [];
@@ -62,8 +74,12 @@ export default async function AdminSchedulePage() {
               const isAdminBlock = booking.metadata?.is_admin_block;
               
               // Formatting dates specifically for Toronto Time for display
-              const startDate = new Date(booking.starts_at).toLocaleString('en-US', { timeZone: "America/Toronto" });
-              const endDate = new Date(booking.ends_at).toLocaleTimeString('en-US', { timeZone: "America/Toronto" });
+              const startDate = new Date(booking.starts_at).toLocaleString("en-US", {
+                timeZone: "America/Toronto",
+              });
+              const endDate = new Date(booking.ends_at).toLocaleTimeString("en-US", {
+                timeZone: "America/Toronto",
+              });
 
               return (
                 <div 
@@ -80,10 +96,12 @@ export default async function AdminSchedulePage() {
                         {isAdminBlock ? `Admin Block (${booking.metadata.category})` : "Client Appointment"}
                       </p>
                       <p className="text-sm text-gray-600">
-                        {startDate} - {endDate}
+                        {startDate} – {endDate}
                       </p>
-                      {isAdminBlock && booking.metadata.note && (
-                        <p className="text-xs text-gray-500 mt-1 italic">Note: {booking.metadata.note}</p>
+                      {isAdminBlock && booking.metadata?.note && (
+                        <p className="text-xs text-gray-500 mt-1 italic">
+                          Note: {booking.metadata.note}
+                        </p>
                       )}
                     </div>
                     <div>
