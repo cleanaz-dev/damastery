@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 
 import AdminScheduleWorkspace from "@/components/admin/admin-time-blocker";
 import { getHapioBookings } from "@/lib/hapio";
+import { syncGoogleCalendarToHapio } from "@/lib/sync-google-to-hapio";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
@@ -13,6 +14,7 @@ function toHapioDateString(date: Date): string {
 
 export default async function AdminSchedulePage() {
   const provider = await prisma.provider.findFirst();
+
 
   if (!provider || !provider.hapioResourceId) {
     return (
@@ -36,30 +38,36 @@ export default async function AdminSchedulePage() {
     );
   }
 
-  const ADMIN_RESOURCE_ID = provider.hapioResourceId;
+ const ADMIN_RESOURCE_ID = provider.hapioResourceId;
 
-  // Fetch from the start of the current month through the next 60 days
   const now = new Date();
   const rangeStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const rangeEnd = new Date(now.getFullYear(), now.getMonth() + 2, 15);
 
+  const fromStr = toHapioDateString(rangeStart);
+  const toStr = toHapioDateString(rangeEnd);
+
+  // 1. Automatically pull new events from Dwayne's Google Calendar into Hapio
+  await syncGoogleCalendarToHapio(ADMIN_RESOURCE_ID, fromStr, toStr);
+
+  // 2. Fetch updated Hapio bookings (which now include Dwayne's Google events)
   const response = await getHapioBookings({
     resourceId: ADMIN_RESOURCE_ID,
-    from: toHapioDateString(rangeStart),
-    to: toHapioDateString(rangeEnd),
+    from: fromStr,
+    to: toStr,
   });
 
   const bookings = response.data || [];
 
   return (
-    <div className="min-h-screen py-4 px-6 lg:px-10 max-w-[1440px] mx-auto space-y-8">
+    <div className="min-h-screen w-full py-10 px-6 lg:px-10 max-w-[1440px] mx-auto space-y-8">
       {/* Header section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-neutral-200/70">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-xs font-semibold tracking-wider uppercase text-neutral-400">
-              Calendar Engine
+              Calendar Engine &middot; Google Synced
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-semibold text-neutral-900 tracking-tight">
@@ -80,7 +88,6 @@ export default async function AdminSchedulePage() {
         </Link>
       </div>
 
-      {/* Unified Interactive Calendar + Time Blocker */}
       <AdminScheduleWorkspace resourceId={ADMIN_RESOURCE_ID} bookings={bookings} />
     </div>
   );
