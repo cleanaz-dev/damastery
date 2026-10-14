@@ -154,6 +154,8 @@ export async function createCustomerBooking(params: {
 }
 
 
+// lib/hapio/index.ts
+
 export async function setupHapioProject(
   clinicName: string, 
   serviceName: string, 
@@ -177,7 +179,7 @@ export async function setupHapioProject(
     })
   });
 
-  // 2. Create Service (NOW 100% DYNAMIC FROM FRONTEND)
+  // 2. Create Service
   const service = await hapioFetch<{ id: string }>(`/services`, {
     method: "POST",
     body: JSON.stringify({
@@ -206,6 +208,43 @@ export async function setupHapioProject(
   await hapioFetch(`/services/${service.id}/resources/${resource.id}`, {
     method: "PUT"
   });
+
+  // ---------------------------------------------------------
+  // NEW: 5. Create a Base Schedule (Requirement for Hapio)
+  // ---------------------------------------------------------
+  const schedule = await hapioFetch<{ id: string }>(`/recurring-schedules`, {
+    method: "POST",
+    body: JSON.stringify({
+      name: "Standard Open Hours"
+    })
+  });
+
+  // NEW: 6. Add "Working Hours" to the schedule. 
+  // We will loop from Day 1 (Monday) to Day 7 (Sunday) and open them 
+  // from 00:00 to 23:59 so the calendar is fully flexible. 
+  // (You use your Admin Blocker to close off times you aren't working).
+  const daysOfWeek = [1, 2, 3, 4, 5, 6, 7];
+  
+  for (const day of daysOfWeek) {
+    await hapioFetch(`/recurring-schedule-blocks`, {
+      method: "POST",
+      body: JSON.stringify({
+        recurring_schedule_id: schedule.id,
+        day_of_week: day,
+        starts_at: "00:00:00",
+        ends_at: "23:59:00"
+      })
+    });
+  }
+
+  // NEW: 7. Assign the Schedule to the Resource
+  await hapioFetch(`/resources/${resource.id}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      recurring_schedule_id: schedule.id
+    })
+  });
+  // ---------------------------------------------------------
 
   return {
     locationId: location.id,
