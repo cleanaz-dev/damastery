@@ -45,10 +45,10 @@ export default function ClientDashboardView({
 
     return (
         // THE CENTRAL COLUMN: Zero borders. Zero shadows.
-        <div className="min-h-screen max-w-5xl mx-auto bg-primary text-stone-800 font-sans selection:bg-stone-400">
+        <div className="min-h-screen max-w-5xl mx-auto bg-stone-200 text-stone-800 font-sans selection:bg-stone-400">
             {/* Minimal Top Navigation */}
             <nav className="w-full px-8 md:px-12 py-8 flex justify-between items-center">
-                <span className="font-serif text-lg tracking-wide text-white">
+                <span className="font-serif text-lg tracking-wide text-stone-900">
                     damastery.
                 </span>
                 <button
@@ -66,10 +66,10 @@ export default function ClientDashboardView({
                     {/* Header / Greeting */}
                     <Reveal delay={0} y={20}>
                         <header className="space-y-4 mt-8">
-                            <h1 className="font-serif text-4xl md:text-5xl text-white tracking-tight">
+                            <h1 className="font-serif text-4xl md:text-5xl text-stone-900 tracking-tight">
                                 Welcome back, {firstName}.
                             </h1>
-                            <p className="text-accent text-lg md:text-xl font-light max-w-xl italic">
+                            <p className="text-stone-500 text-lg md:text-xl font-light max-w-xl italic">
                                 Your personal space to track your growth, prepare for sessions, and access your resources.
                             </p>
                         </header>
@@ -83,7 +83,7 @@ export default function ClientDashboardView({
                             y={30}
                             className="space-y-8"
                         >
-                            <h2 className="text-xs font-semibold tracking-[0.2em]  uppercase text-accent">
+                            <h2 className="text-xs font-semibold tracking-[0.2em]  uppercase">
                                 Upcoming Sessions
                             </h2>
 
@@ -142,7 +142,7 @@ export default function ClientDashboardView({
                             y={30}
                             className="space-y-8"
                         >
-                            <h2 className="text-xs font-semibold tracking-[0.2em] text-accent uppercase">
+                            <h2 className="text-xs font-semibold tracking-[0.2em]  uppercase">
                                 Action Items
                             </h2>
 
