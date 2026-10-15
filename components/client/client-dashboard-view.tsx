@@ -69,7 +69,7 @@ export default function ClientDashboardView({
                             <h1 className="font-serif text-4xl md:text-5xl text-white tracking-tight">
                                 Welcome back, {firstName}.
                             </h1>
-                            <p className="text-mnuted-foreground text-lg md:text-xl font-light max-w-xl italic">
+                            <p className="text-accent text-lg md:text-xl font-light max-w-xl italic">
                                 Your personal space to track your growth, prepare for sessions, and access your resources.
                             </p>
                         </header>
@@ -83,7 +83,7 @@ export default function ClientDashboardView({
                             y={30}
                             className="space-y-8"
                         >
-                            <h2 className="text-xs font-semibold tracking-[0.2em]  uppercase">
+                            <h2 className="text-xs font-semibold tracking-[0.2em]  uppercase text-accent">
                                 Upcoming Sessions
                             </h2>
 
@@ -142,7 +142,7 @@ export default function ClientDashboardView({
                             y={30}
                             className="space-y-8"
                         >
-                            <h2 className="text-xs font-semibold tracking-[0.2em]  uppercase">
+                            <h2 className="text-xs font-semibold tracking-[0.2em] text-accent uppercase">
                                 Action Items
                             </h2>
 
