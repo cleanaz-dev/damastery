@@ -37,12 +37,20 @@ export async function bookMeetingAction(
   startsAt: string,
   endsAt: string,
 ): Promise<Result> {
+  const t0 = Date.now();
+  let tag = "[book]"; // becomes [book:<bookingId>] once we have one
+  const log = (msg: string, extra?: unknown) =>
+    extra === undefined ? console.log(`${tag} ${msg}`) : console.log(`${tag} ${msg}`, extra);
+  const logError = (msg: string, err?: unknown) =>
+    console.error(`${tag} ${msg}`, err instanceof Error ? err.message : err ?? "");
+
   // 1. Must be logged in
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) {
     return { success: false, error: "Please log in to book a session." };
   }
   const user = session.user;
+  log(`start for ${user.email}`, { startsAt, endsAt });
 
   // 2. Validate input (the client can send anything)
   const start = new Date(startsAt);
@@ -59,6 +67,7 @@ export async function bookMeetingAction(
     where: { hapioResourceId: resourceId },
   });
   if (!provider) {
+    logError("provider not found for resource", resourceId);
     return { success: false, error: "Provider not found." };
   }
 
@@ -71,8 +80,9 @@ export async function bookMeetingAction(
       endsAt,
       isTemporary: false,
     });
+    log(`OK   hapio booking ${hapioBooking.id}`);
   } catch (err: any) {
-    console.error("Hapio booking failed:", err?.message);
+    logError("FAIL hapio booking:", err);
     return {
       success: false,
       error: "That time is no longer available. Please pick another.",
@@ -91,12 +101,15 @@ export async function bookMeetingAction(
         endsAt: end,
       },
     });
+    tag = `[book:${booking.id}]`;
+    log("OK   db booking saved");
   } catch (err: any) {
-    console.error("DB booking failed, rolling back Hapio:", err?.message);
+    logError("FAIL db booking, rolling back hapio:", err);
     try {
       await cancelHapioBooking(hapioBooking.id);
+      log("OK   hapio rollback");
     } catch (rollbackErr: any) {
-      console.error("Rollback failed:", hapioBooking.id, rollbackErr?.message);
+      logError(`FAIL hapio rollback (booking ${hapioBooking.id} is orphaned):`, rollbackErr);
     }
     return { success: false, error: "Something went wrong. Please try again." };
   }
@@ -109,6 +122,7 @@ export async function bookMeetingAction(
   const duration = `${minutes} minutes`;
 
   let joinUrl: string | undefined;
+  let zoomStatus: "created" | "created-not-saved" | "failed" = "failed";
   try {
     const zoom = await createZoomMeeting({
       topic: `Session with ${user.name}`,
@@ -116,17 +130,26 @@ export async function bookMeetingAction(
       durationMinutes: minutes,
     });
     joinUrl = zoom.joinUrl;
+    zoomStatus = "created-not-saved";
+    log(`OK   zoom meeting ${zoom.id} created`);
+
     await prisma.booking.update({
       where: { id: booking.id },
       data: { zoomMeetingId: zoom.id, zoomJoinUrl: zoom.joinUrl },
     });
+    zoomStatus = "created";
+    log("OK   zoom meeting saved to db");
   } catch (err: any) {
-    console.error("Zoom meeting failed:", err?.message);
+    if (zoomStatus === "created-not-saved") {
+      logError("FAIL saving zoom ids to db (meeting exists in Zoom, link will still be emailed):", err);
+    } else {
+      logError("FAIL zoom meeting (booking kept, emails go without a link):", err);
+    }
   }
-  console.log("Created Zoom....")
+
   // 7. Emails. A failed email must not fail the booking, and one failing
   //    must not stop the other, so they send independently.
-  const results = await Promise.allSettled([
+  const [clientRes, adminRes] = await Promise.allSettled([
     sendEmail({
       to: user.email,
       subject: "Your session is booked",
@@ -164,16 +187,18 @@ export async function bookMeetingAction(
     }),
   ]);
 
-  console.log("Sending Emails....")
-
-  results.forEach((r, i) => {
-    if (r.status === "rejected") {
-      console.error(
-        `${i === 0 ? "Client" : "Admin"} email failed:`,
-        r.reason?.message,
-      );
+  for (const [label, r] of [["client", clientRes], ["admin", adminRes]] as const) {
+    if (r.status === "fulfilled") {
+      log(`OK   ${label} email sent`, { id: r.value?.id });
+    } else {
+      logError(`FAIL ${label} email:`, r.reason);
     }
-  });
+  }
+
+  // 8. One-line summary
+  log(
+    `done in ${Date.now() - t0}ms | zoom=${zoomStatus} | client email=${clientRes.status} | admin email=${adminRes.status}`,
+  );
 
   return { success: true };
 }
