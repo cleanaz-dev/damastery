@@ -14,15 +14,24 @@ export default async function ClientDashboardPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
-      {/* Header */}
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-          Clients Directory
-        </h1>
-        <p className="text-sm text-gray-500">
-          View and manage registered clients, booking history, and intake submissions.
-        </p>
-      </div>
+      {/* Header section */}
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-neutral-200/70">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs font-semibold tracking-wider uppercase text-neutral-400">
+              Client Management &middot; Directory
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-neutral-900 tracking-tight">
+            Clients Directory
+          </h1>
+          <p className="text-sm text-neutral-500 mt-1">
+            View and manage registered clients, booking history, and intake
+            submissions.
+          </p>
+        </div>
+      </header>
 
       {/* Quick Summary Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

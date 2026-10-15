@@ -62,7 +62,7 @@ export default async function AdminSchedulePage() {
   return (
     <div className="min-h-screen w-full py-10 px-6 lg:px-10 max-w-[1440px] mx-auto space-y-8">
       {/* Header section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-neutral-200/70">
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-neutral-200/70">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -86,7 +86,7 @@ export default async function AdminSchedulePage() {
           <span>Resource Settings</span>
           <span>&rarr;</span>
         </Link>
-      </div>
+      </header>
 
       <AdminScheduleWorkspace resourceId={ADMIN_RESOURCE_ID} bookings={bookings} />
     </div>
