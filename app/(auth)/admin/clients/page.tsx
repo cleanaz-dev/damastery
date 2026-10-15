@@ -8,7 +8,7 @@ export default async function ClientDashboardPage() {
   const { clients, stats } = await getClientsDashboard();
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6">
+    <div className="mx-auto max-w-[1440px] w-full space-y-6 p-6">
       {/* Header section */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-neutral-200/70">
         <div>
