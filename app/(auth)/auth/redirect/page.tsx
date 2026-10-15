@@ -9,5 +9,5 @@ export default async function AuthRedirectPage() {
 
   if (session.user.role === "ADMIN") redirect("/admin");
 
-  redirect(`/client/${session.user.id}`);
+  redirect(`/client/dasboard`);
 }

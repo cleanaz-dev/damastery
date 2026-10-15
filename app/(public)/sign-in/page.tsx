@@ -82,12 +82,12 @@ export default function SignInPage() {
           </Button>
         </form>
 
-        <p className="text-muted-foreground text-center text-sm">
+        {/* <p className="text-muted-foreground text-center text-sm">
           Don&apos;t have an account?{" "}
           <Link href="/sign-up" className="text-foreground underline">
             Sign up
           </Link>
-        </p>
+        </p> */}
       </div>
     </AuthLayout>
   );
