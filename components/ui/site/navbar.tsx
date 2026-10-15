@@ -89,7 +89,7 @@ export function Navbar() {
             {/* Drawer header */}
             <div className="flex items-center justify-between border-b border-primary-foreground/20 pb-6">
               <DrawerTitle className="font-serif text-xl tracking-[-0.04em]">
-                damastery<span className="text-accent">.</span>
+                <span className="text-white">damastery</span><span className="text-accent">.</span>
               </DrawerTitle>
 
               <DrawerClose
