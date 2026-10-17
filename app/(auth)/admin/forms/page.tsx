@@ -1,7 +1,11 @@
-export default async function BlogsPage() {
-    return (
-        <div className="flex h-full w-full items-center justify-center">
-            <h1 className="text-3xl font-bold">Welcome to the Forms Page</h1>
-        </div>
-    )
+import FormPage from "@/components/forms/form-page";
+import { getAllForms } from "@/lib/actions/get-forms";
+import { requireAdmin } from "@/lib/auth-guard";
+
+export default async function Page() {
+  await requireAdmin();
+
+  const forms = await getAllForms();
+
+  return <FormPage forms={forms} />;
 }
