@@ -3,6 +3,7 @@ import { ClipboardList, FileText, Plus } from "lucide-react";
 
 import type { FormWithSubmissions } from "@/lib/actions/get-forms";
 import { CreateForm } from "@/components/forms/create-form";
+import { FormRowActions } from "./form-buttons";
 
 type FormPageProps = {
   forms: FormWithSubmissions[];
@@ -87,11 +88,16 @@ export default function FormPage({ forms }: FormPageProps) {
 
                       <span className="shrink-0 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
                         {submissionCount}{" "}
-                        {submissionCount === 1
-                          ? "submission"
-                          : "submissions"}
+                        {submissionCount === 1 ? "submission" : "submissions"}
                       </span>
                     </Link>
+
+                    <div className="flex items-center gap-3">
+                      <span className="badge">
+                        {form.submissions.length} submissions
+                      </span>
+                      <FormRowActions id={form.id} />
+                    </div>
                   </li>
                 );
               })}
