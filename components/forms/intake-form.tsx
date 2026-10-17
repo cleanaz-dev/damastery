@@ -5,6 +5,7 @@ import { useMemo, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
 import { submitIntake } from "@/lib/actions/intake-form";
+import type { FormComponentProps } from "@/lib/forms/registry";
 import { AckField } from "./parts/ack-field";
 import { ChoiceField } from "./parts/choice-field";
 import { FormHeader } from "./parts/form-header";
@@ -14,7 +15,6 @@ import { LikertQuestion } from "./parts/likert-question";
 import { TextAreaField } from "./parts/text-area-field";
 import { TextListField } from "./parts/text-list-field";
 
-// [SECTIONS array remains exactly the same]
 export const SECTIONS = [
   {
     id: "A",
@@ -85,12 +85,10 @@ export const SECTIONS = [
 
 const TOTAL = 25;
 
-type Props = {
-  token: string;
-  defaults: { name: string; email: string; message: string };
-};
+export function IntakeForm({ token, defaults }: FormComponentProps) {
+  const firstName =
+    typeof defaults.name === "string" ? defaults.name.split(" ")[0] : "";
 
-export function IntakeForm({ token, defaults }: Props) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [reach, setReach] = useState(["", "", ""]);
   const [story, setStory] = useState("");
@@ -146,15 +144,10 @@ export function IntakeForm({ token, defaults }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-16 animate-in fade-in duration-700">
-      
       <div className="space-y-8">
-        <FormHeader 
-          eyebrow="Damastery · Week 0" 
-          title="The Baseline Audit"
-        >
-          {/* UPDATED: Changed from text-slate-600 to text-slate-900 and text-xl for stark readability */}
+        <FormHeader eyebrow="Damastery · Week 0" title="The Baseline Audit">
           <p className="text-xl md:text-2xl text-slate-900 font-serif leading-relaxed max-w-2xl">
-            Hi {defaults.name.split(" ")[0]}. Twenty-five statements, four questions, ten
+            Hi {firstName}. Twenty-five statements, four questions, ten
             minutes. Answer for the last 30 days, not your best week. Honest beats impressive.
           </p>
         </FormHeader>
@@ -241,7 +234,6 @@ export function IntakeForm({ token, defaults }: Props) {
             showError={showErrors}
           />
           <AckField id="ack" checked={ack} onChange={setAck} showError={showErrors}>
-            {/* UPDATED: text-slate-900 instead of slate-600 */}
             <span className="text-base md:text-lg text-slate-900 leading-relaxed font-medium">
               I understand this is a coaching self-assessment, not a clinical screening or a
               diagnosis, and that coaching is not a substitute for therapy or medical care.
@@ -257,10 +249,10 @@ export function IntakeForm({ token, defaults }: Props) {
       )}
 
       <div className="pt-8">
-        <Button 
-          type="submit" 
-          size="lg" 
-          className="w-full py-8 text-lg bg-slate-900 hover:bg-slate-800 text-white font-medium tracking-wide uppercase shadow-xl hover:shadow-2xl transition-all" 
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full py-8 text-lg bg-slate-900 hover:bg-slate-800 text-white font-medium tracking-wide uppercase shadow-xl hover:shadow-2xl transition-all"
           disabled={pending}
         >
           {pending ? "Submitting…" : "Submit my baseline"}
