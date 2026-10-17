@@ -7,5 +7,9 @@ export default async function Page() {
 
   const forms = await getAllForms();
 
-  return <FormPage forms={forms} />;
+  return (
+    <div className="max-w-[1440px] mx-auto mx-auto w-full space-y-8 p-6 lg:p-10">
+      <FormPage forms={forms} />
+    </div>
+  );
 }
