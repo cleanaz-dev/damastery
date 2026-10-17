@@ -16,7 +16,7 @@ export default function FormPage({ forms }: FormPageProps) {
   );
 
   return (
-    <main className="">
+    <main className="space-y-8">
       <header className="flex flex-col gap-2">
         <p className="text-sm font-medium text-primary">Administration</p>
 
