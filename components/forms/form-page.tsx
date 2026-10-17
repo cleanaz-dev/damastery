@@ -68,10 +68,13 @@ export default function FormPage({ forms }: FormPageProps) {
                 const submissionCount = form.submissions.length;
 
                 return (
-                  <li key={form.id}>
+                  <li
+                    key={form.id}
+                    className="group flex items-center gap-4 px-5 py-4 transition-colors hover:bg-muted/50"
+                  >
                     <Link
                       href={`/admin/forms/${form.id}`}
-                      className="group flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-muted/50"
+                      className="flex min-w-0 flex-1 items-center justify-between gap-4"
                     >
                       <div className="min-w-0">
                         <h3 className="truncate font-medium group-hover:text-primary">
@@ -92,12 +95,7 @@ export default function FormPage({ forms }: FormPageProps) {
                       </span>
                     </Link>
 
-                    <div className="flex items-center gap-3">
-                      <span className="badge">
-                        {form.submissions.length} submissions
-                      </span>
-                      <FormRowActions id={form.id} />
-                    </div>
+                    <FormRowActions id={form.id} />
                   </li>
                 );
               })}
