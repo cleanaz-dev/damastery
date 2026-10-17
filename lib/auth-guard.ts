@@ -3,6 +3,7 @@ import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { UserRole } from "./generated/prisma/enums";
 
 export const requireUser = cache(async () => {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -15,11 +16,12 @@ export const requireUser = cache(async () => {
 export const requireAdmin = cache(async () => {
   const session = await requireUser();
 
-  if (session.user.role !== "admin") redirect("/");
+  if (session.user.role !== UserRole.ADMIN) {
+    redirect("/");
+  }
 
   return session;
 });
-
 export const isRegistered = cache(
   async (callbackUrl?: string, registerUrl?: string) => {
     const session = await auth.api.getSession({ headers: await headers() });
