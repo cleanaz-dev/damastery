@@ -3,16 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-
 import { requireAdmin } from "@/lib/auth-guard";
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "../generated/prisma/client";
+import { Prisma } from "@/lib/generated/prisma/client";
 
 export type CreateFormState = {
   error?: string;
 };
 
-function slugify(value: string) {
+function slugify(value: string): string {
   return value
     .toLowerCase()
     .normalize("NFKD")
@@ -36,29 +35,39 @@ export async function createNewForm(
   const normalizedTitle = title.trim();
 
   if (normalizedTitle.length > 100) {
-    return { error: "The form title must be 100 characters or fewer." };
+    return {
+      error: "The form title must be 100 characters or fewer.",
+    };
   }
 
   const key = slugify(normalizedTitle);
 
   if (!key) {
-    return { error: "The title needs at least one letter or number." };
+    return {
+      error: "The title needs at least one letter or number.",
+    };
   }
 
-  let formId: string;
-
   try {
-    const form = await prisma.form.create({
-      data: { title: normalizedTitle, key },
+    await prisma.form.create({
+      data: {
+        title: normalizedTitle,
+        key,
+      },
     });
-    formId = form.id;
-  } catch (e) {
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
-      return { error: "A form with that title already exists." };
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return {
+        error: "A form with that title already exists.",
+      };
     }
-    throw e;
+
+    throw error;
   }
 
   revalidatePath("/admin/forms");
-  // redirect(`/admin/forms`);
+  redirect("/admin/forms");
 }
