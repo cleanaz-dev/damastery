@@ -32,17 +32,19 @@ const schema = z.object({
   }),
 });
 
+export type BaselineAuditResult = { error: string } | undefined;
+
 export async function submitBaselineAuditForm(
   token: string,
   payload: unknown
-) {
-  // 1. Validate payload shape first
+): Promise<BaselineAuditResult> {
+  // 1. Validate payload shape first (zero I/O on invalid submit)
   const parsed = schema.safeParse(payload);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid form data." };
   }
 
-  // 2. Verify Session & Assignment simultaneously
+  // 2. Verify Session & Assignment in parallel
   const [session, assignment] = await Promise.all([
     isRegistered(token),
     getValidAssignmentByToken(token, "baseline-audit"),
@@ -56,7 +58,14 @@ export async function submitBaselineAuditForm(
     return { error: "This link is invalid, already completed, or has expired." };
   }
 
-  // 3. AI verification
+  // Guard against mismatched accounts
+  if (session.user.email.toLowerCase() !== assignment.email.toLowerCase()) {
+    return {
+      error: `This form was assigned to ${assignment.email}. Please switch accounts to continue.`,
+    };
+  }
+
+  // 3. AI response gatekeeper
   const check = await checkIntakeAnswers(parsed.data.open);
   if (!check.ok) {
     return { error: check.reason || "Please give real answers in the written section." };
@@ -69,21 +78,25 @@ export async function submitBaselineAuditForm(
     update: {},
   });
 
-  // 5. Transaction: Mark FormAssignment COMPLETED & insert FormSubmission
+  // 5. Atomic transaction to mark assignment completed & save submission
   await completeFormAssignment({
     assignmentId: assignment.id,
     profileId: profile.id,
     data: parsed.data,
   });
 
-  // 6. Confirmation Email
+  // 6. Non-blocking confirmation email
+  const firstName = session.user.name?.trim()
+    ? session.user.name.trim().split(" ")[0]
+    : (assignment.name?.trim() ? assignment.name.trim().split(" ")[0] : "there");
+
   try {
     await sendEmail({
       to: session.user.email,
       from: process.env.EMAIL_FROM as string,
       subject: "Thank You!",
       react: CompleteFormEmail({
-        firstName: session.user.name.split(" ")[0],
+        firstName,
         formName: assignment.form.title,
       }),
     });
