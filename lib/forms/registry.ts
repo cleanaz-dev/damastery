@@ -1,6 +1,7 @@
 // lib/forms/registry.ts
 import type { ComponentType } from "react";
-import { IntakeForm } from "@/components/forms/base-line-audit";
+import { BaseLineAudit } from "@/components/forms/base-line-audit";
+import { IntakeForm } from "@/components/forms/intake-form";
 
 export type FormComponentProps = {
   token: string;
@@ -8,7 +9,8 @@ export type FormComponentProps = {
 };
 
 export const formRegistry = {
-  intake: IntakeForm,
+  "baseline-audit": BaseLineAudit,
+  "intake-form": IntakeForm
 } satisfies Record<string, ComponentType<FormComponentProps>>;
 
 export type FormKey = keyof typeof formRegistry;
