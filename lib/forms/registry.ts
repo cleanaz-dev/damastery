@@ -1,6 +1,6 @@
 // lib/forms/registry.ts
 import type { ComponentType } from "react";
-import { IntakeForm } from "@/components/forms/intake-form";
+import { IntakeForm } from "@/components/forms/base-line-audit";
 
 export type FormComponentProps = {
   token: string;

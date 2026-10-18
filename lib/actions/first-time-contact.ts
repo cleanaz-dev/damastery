@@ -5,8 +5,8 @@ import { redis } from "@/lib/redis";
 import { sendEmail } from "@/lib/emails/send";
 import { FirstContactEmail } from "@/lib/emails/templates/first-contact";
 
-const FORM_IDS = ["intake"] as const; // add form ids here
-export type FormId = (typeof FORM_IDS)[number];
+
+
 
 const TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
@@ -14,7 +14,7 @@ export type PendingClient = {
   name: string;
   email: string;
   message: string;
-  formId: FormId;
+  formId: string;
 };
 
 export type FirstContactState = { error?: string };
@@ -26,12 +26,12 @@ export async function firstContactAction(
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const message = String(formData.get("message") ?? "").trim();
-  const formId = String(formData.get("formId") ?? "intake") as FormId;
+  const formId = String(formData.get("formId") ?? "")
 
   if (!name || !message || !/^\S+@\S+\.\S+$/.test(email)) {
     return { error: "Please fill in your name, a valid email, and a message." };
   }
-  if (!FORM_IDS.includes(formId)) {
+  if (!formId) {
     return { error: "Something went wrong. Please try again." };
   }
 

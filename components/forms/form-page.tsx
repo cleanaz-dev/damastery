@@ -78,6 +78,9 @@ export default function FormPage({ forms }: FormPageProps) {
                         <h3 className="truncate font-medium group-hover:text-primary">
                           {form.title}
                         </h3>
+                        <p className="text-xs">
+                          {form.key}
+                        </p>
 
                         <p className="mt-1 text-sm text-muted-foreground">
                           Created{" "}
