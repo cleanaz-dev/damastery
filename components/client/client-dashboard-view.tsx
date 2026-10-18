@@ -63,7 +63,8 @@ export default function ClientDashboardView({
                 Welcome back, {firstName}.
               </h1>
               <p className="text-stone-500 text-lg md:text-xl font-light max-w-xl italic">
-                Your personal space to track your growth, prepare for sessions, and access your resources.
+                Your personal space to track your growth, prepare for sessions,
+                and access your resources.
               </p>
             </header>
           </Reveal>
@@ -138,7 +139,10 @@ export default function ClientDashboardView({
                     className="group flex items-center justify-between py-4 border-b border-stone-200 hover:border-stone-400 transition-all"
                   >
                     <div className="flex items-center gap-4">
-                      <CircleDashed className="w-5 h-5 text-stone-800" strokeWidth={1} />
+                      <CircleDashed
+                        className="w-5 h-5 text-stone-800"
+                        strokeWidth={1}
+                      />
                       <span className="text-base text-stone-900 font-medium">
                         {assignment.form.title}
                       </span>
@@ -153,16 +157,23 @@ export default function ClientDashboardView({
                 {completedSubmissions.map((submission) => (
                   <div
                     key={submission.id}
-                    className="flex items-center justify-between py-4 border-b border-stone-200 opacity-60"
+                    className="flex items-center justify-between py-4 border-b border-stone-300/60"
                   >
                     <div className="flex items-center gap-4">
-                      <CheckCircle2 className="w-5 h-5 text-stone-500" strokeWidth={1} />
-                      <span className="text-base text-stone-500 line-through decoration-stone-300">
-                        {submission.form?.title ?? submission.formSlug}
+                      {/* Subtle green check badge */}
+                      <span className="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-950/5 text-emerald-700">
+                        <CheckCircle2 className="w-4 h-4" strokeWidth={2} />
                       </span>
+                      <div>
+                        <span className="text-base text-stone-800 font-medium">
+                          {submission.form?.title ?? submission.formSlug}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-xs italic text-stone-400">
-                      Completed{" "}
+
+                    {/* Subtle status tag with date */}
+                    <span className="text-xs font-medium tracking-wide uppercase px-2.5 py-1 rounded-full bg-emerald-900/10 text-emerald-800">
+                      Completed ·{" "}
                       {new Intl.DateTimeFormat("en-US", {
                         month: "short",
                         day: "numeric",
@@ -173,13 +184,14 @@ export default function ClientDashboardView({
                 ))}
 
                 {/* Empty State */}
-                {pendingAssignments.length === 0 && completedSubmissions.length === 0 && (
-                  <div className="py-4">
-                    <p className="text-stone-500 italic">
-                      No action items at this time. You're all caught up!
-                    </p>
-                  </div>
-                )}
+                {pendingAssignments.length === 0 &&
+                  completedSubmissions.length === 0 && (
+                    <div className="py-4">
+                      <p className="text-stone-500 italic">
+                        No action items at this time. You're all caught up!
+                      </p>
+                    </div>
+                  )}
               </div>
             </Reveal>
           </div>
