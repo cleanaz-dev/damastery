@@ -11,6 +11,7 @@ import {
   getValidAssignmentByToken,
   completeFormAssignment,
 } from "@/lib/forms/assignments";
+import { createCommand } from "@/lib/aws";
 
 const schema = z.object({
   answers: z
@@ -65,11 +66,23 @@ export async function submitBaselineAuditForm(
     };
   }
 
-  // 3. AI response gatekeeper
-  const check = await checkIntakeAnswers(parsed.data.open);
-  if (!check.ok) {
-    return { error: check.reason || "Please give real answers in the written section." };
+  // // 3. AI response gatekeeper
+  // const check = await checkIntakeAnswers(parsed.data.open);
+  // if (!check.ok) {
+  //   return { error: check.reason || "Please give real answers in the written section." };
+  // }
+
+  // now using lambda invoke
+  const lambdaPayload = {
+    data: parsed.data.open,
+    webhookUrl: process.env.NEXT_PUBLIC_APP_URL
   }
+
+  const command = createCommand({
+    functionName: "damastery-check-form",
+    invocationType: "Event",
+    payload: lambdaPayload
+  })
 
   // 4. Ensure client profile exists
   const profile = await prisma.clientProfile.upsert({

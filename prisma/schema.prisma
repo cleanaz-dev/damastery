@@ -23,6 +23,11 @@ enum BookingStatus {
   CANCELLED
 }
 
+enum TaskType {
+  DEFAULT
+  CHECKFORM
+}
+
 model User {
   id            String   @id @default(cuid())
   name          String
@@ -46,8 +51,9 @@ model User {
 
   profile ClientProfile?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  systemTasks SystemTask[]
 }
 
 model ClientProfile {
@@ -55,7 +61,7 @@ model ClientProfile {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  assignments FormAssignment[]  // <-- Must be present
+  assignments FormAssignment[] // <-- Must be present
   submissions FormSubmission[]
 
   createdAt DateTime @default(now())
@@ -203,4 +209,17 @@ model ZoomConnection {
   accessToken     String?
   accessExpiresAt DateTime?
   updatedAt       DateTime  @updatedAt
+}
+
+model SystemTask {
+  id   String   @id @default(cuid())
+  type TaskType @default(DEFAULT)
+
+  createdBy User @relation(fields: [userId], references: [id])
+
+  metadata Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
 }
