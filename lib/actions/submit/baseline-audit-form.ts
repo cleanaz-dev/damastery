@@ -4,14 +4,17 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { isRegistered } from "@/lib/auth-guard";
-import { checkIntakeAnswers } from "@/lib/prompts/intake-form-prompt";
 import { sendEmail } from "@/lib/emails/send";
 import { CompleteFormEmail } from "@/lib/emails/templates/complete-form";
 import {
   getValidAssignmentByToken,
   completeFormAssignment,
+  createFormAssignment,
 } from "@/lib/forms/assignments";
-import { createCommand } from "@/lib/aws";
+import { createCommand, lambda } from "@/lib/aws"; // ensure your lambda client is exported
+import { getWebhookUrl } from "@/lib/api";
+
+const NEXT_FORM_KEY = "intake-form";
 
 const schema = z.object({
   answers: z
@@ -66,42 +69,73 @@ export async function submitBaselineAuditForm(
     };
   }
 
-  // // 3. AI response gatekeeper
-  // const check = await checkIntakeAnswers(parsed.data.open);
-  // if (!check.ok) {
-  //   return { error: check.reason || "Please give real answers in the written section." };
-  // }
-
-  // now using lambda invoke
-  const lambdaPayload = {
-    data: parsed.data.open,
-    webhookUrl: process.env.NEXT_PUBLIC_APP_URL
-  }
-
-  const command = createCommand({
-    functionName: "damastery-check-form",
-    invocationType: "Event",
-    payload: lambdaPayload
-  })
-
-  // 4. Ensure client profile exists
+  // 3. Ensure client profile exists
   const profile = await prisma.clientProfile.upsert({
     where: { userId: session.user.id },
     create: { userId: session.user.id },
     update: {},
   });
 
-  // 5. Atomic transaction to mark assignment completed & save submission
-  await completeFormAssignment({
+  // 4. Mark Baseline Audit COMPLETED & insert FormSubmission
+  const { submission } = await completeFormAssignment({
     assignmentId: assignment.id,
     profileId: profile.id,
     data: parsed.data,
   });
 
-  // 6. Non-blocking confirmation email
+  // 5. Automatically create/assign the NEXT form ("intake-form") for their dashboard
+  let nextAssignment;
+  try {
+    nextAssignment = await createFormAssignment({
+      formKey: NEXT_FORM_KEY,
+      email: session.user.email,
+      name: session.user.name ?? assignment.name ?? undefined,
+      profileId: profile.id,
+    });
+  } catch (err) {
+    console.error("Failed to automatically assign next form:", err);
+  }
+
+  // 6. Record System Task & invoke Lambda asynchronously (Fire-and-Forget)
+  try {
+    const task = await prisma.systemTask.create({
+      data: {
+        metadata: {
+          token,
+          userId: session.user.id,
+          profileId: profile.id,
+          submissionId: submission.id,
+          nextAssignmentId: nextAssignment?.id,
+        },
+      },
+    });
+
+    const webhookUrl = getWebhookUrl(task.id);
+
+    const command = createCommand({
+      functionName: "damastery-check-form",
+      invocationType: "Event", // Async Lambda execution
+      payload: {
+        data: parsed.data.open,
+        webhookUrl,
+        taskId: task.id,
+        submissionId: submission.id,
+      },
+    });
+
+    // Actually send the command to AWS
+    await lambda.send(command);
+  } catch (err) {
+    console.error("Failed to enqueue Lambda check:", err);
+    // Don't crash user redirect; webhook or background job can reconcile
+  }
+
+  // 7. Non-blocking confirmation email
   const firstName = session.user.name?.trim()
     ? session.user.name.trim().split(" ")[0]
-    : (assignment.name?.trim() ? assignment.name.trim().split(" ")[0] : "there");
+    : assignment.name?.trim()
+    ? assignment.name.trim().split(" ")[0]
+    : "there";
 
   try {
     await sendEmail({

@@ -215,11 +215,11 @@ model SystemTask {
   id   String   @id @default(cuid())
   type TaskType @default(DEFAULT)
 
-  createdBy User @relation(fields: [userId], references: [id])
+  createdBy User? @relation(fields: [userId], references: [id])
 
   metadata Json
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  userId    String
+  userId    String?
 }
