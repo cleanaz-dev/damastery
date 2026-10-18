@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
-import { redis } from "@/lib/redis";
-import type { PendingClient } from "@/lib/actions/first-time-contact";
 import { RegisterForm } from "@/components/forms/register-form";
+import { getValidAssignmentByToken } from "@/lib/forms/assignments";
 
 export default async function RegisterPage({
   searchParams,
@@ -11,14 +10,18 @@ export default async function RegisterPage({
   const { token } = await searchParams;
   if (!token) notFound();
 
-  const pending = await redis.get<PendingClient>(`client:${token}`);
-  if (!pending) notFound(); // expired or invalid link
+  // Look up the assignment from Postgres instead of Redis
+  const assignment = await getValidAssignmentByToken(token);
+  if (!assignment) notFound(); // Expired, inactive, or invalid token
 
   return (
     <main>
       <RegisterForm
         token={token}
-        defaults={{ name: pending.name, email: pending.email }}
+        defaults={{
+          name: assignment.name ?? "",
+          email: assignment.email,
+        }}
       />
     </main>
   );
