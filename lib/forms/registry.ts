@@ -1,5 +1,5 @@
-import { BaseLineAudit } from "@/components/forms/base-line-audit";
-import { IntakeForm } from "@/components/forms/intake-form";
+import { BaseLineAudit } from "@/components/forms/template/base-line-audit";
+import { IntakeForm } from "@/components/forms/template/intake-form";
 import { PendingClient } from "@/lib/actions/first-time-contact";
 import { ComponentType } from "react";
 

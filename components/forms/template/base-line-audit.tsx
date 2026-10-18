@@ -5,15 +5,15 @@ import { useMemo, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
 import { submitIntake } from "@/lib/actions/intake-form";
-import type { FormComponentProps } from "@/lib/forms/registry";
-import { AckField } from "./parts/ack-field";
-import { ChoiceField } from "./parts/choice-field";
-import { FormHeader } from "./parts/form-header";
-import { FormProgress } from "./parts/form-progress";
-import { FormSection } from "./parts/form-section";
-import { LikertQuestion } from "./parts/likert-question";
-import { TextAreaField } from "./parts/text-area-field";
-import { TextListField } from "./parts/text-list-field";
+import type { FormProps } from "@/lib/forms/registry";
+import { AckField } from "../parts/ack-field";
+import { ChoiceField } from "../parts/choice-field";
+import { FormHeader } from "../parts/form-header";
+import { FormProgress } from "../parts/form-progress";
+import { FormSection } from "../parts/form-section";
+import { LikertQuestion } from "../parts/likert-question";
+import { TextAreaField } from "../parts/text-area-field";
+import { TextListField } from "../parts/text-list-field";
 
 export const SECTIONS = [
   {
@@ -85,7 +85,7 @@ export const SECTIONS = [
 
 const TOTAL = 25;
 
-export function BaseLineAudit({ token, defaults }: FormComponentProps) {
+export function BaseLineAudit({ token, defaults }: FormProps) {
   const firstName =
     typeof defaults.name === "string" ? defaults.name.split(" ")[0] : "";
 
