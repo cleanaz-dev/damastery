@@ -12,11 +12,20 @@ export default async function Page({
 
   // 1. Fetch & validate assignment via DB helper
   const assignment = await getValidAssignmentByToken(token);
-  if (!assignment) notFound();
+  if (!assignment) {
+    console.error("[404 DEBUG] Assignment lookup failed for token:", token);
+    notFound();
+  }
 
   // 2. Verify component exists in your frontend code map
   const FormComponent = formComponents[assignment.form.key];
-  if (!FormComponent) notFound();
+  if (!FormComponent) {
+    console.error(
+      `[404 DEBUG] FormComponent missing for form.key: "${assignment.form.key}". Available keys:`,
+      Object.keys(formComponents)
+    );
+    notFound();
+  }
 
   // 3. User must be registered/authenticated to submit
   await isRegistered(undefined, `/register?token=${token}`);
