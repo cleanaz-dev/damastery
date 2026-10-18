@@ -1,21 +1,22 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { redis } from "@/lib/redis";
-import { prisma } from "@/lib/prisma"; // adjust to your prisma client import
+import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/emails/send";
 import { FirstContactEmail } from "@/lib/emails/templates/first-contact";
 import { formComponents } from "@/lib/forms/registry";
+import { createFormAssignment } from "@/lib/forms/assignments";
 
-const TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
+// Hardcoded initial form for all new contact inquiries
+const INITIAL_FORM_KEY = "baseline-audit";
 
 export type PendingClient = {
   name: string;
   email: string;
   message: string;
-  formId: string;    // Prisma Form.id (ready for FormSubmission.formId)
-  formKey: string;   // Prisma Form.key (maps to React component & FormSubmission.formSlug)
-  formTitle: string; // Prisma Form.title
+  formId: string;
+  formKey: string;
+  formTitle: string;
 };
 
 export type FirstContactState = { error?: string };
@@ -27,40 +28,37 @@ export async function firstContactAction(
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const message = String(formData.get("message") ?? "").trim();
-  const formKey = String(formData.get("formKey") ?? "").trim();
 
   if (!name || !message || !/^\S+@\S+\.\S+$/.test(email)) {
     return { error: "Please fill in your name, a valid email, and a message." };
   }
 
-  if (!formKey) {
-    return { error: "No form specified." };
-  }
-
-  // 1. Check the DB: Does this form exist and is it active?
+  // 1. Verify that the baseline audit exists, is active, and is registered in the UI
   const dbForm = await prisma.form.findUnique({
-    where: { key: formKey },
+    where: { key: INITIAL_FORM_KEY },
   });
 
-  if (!dbForm || !dbForm.active || !formComponents[dbForm.key]) {
-    return { error: "This form is currently unavailable. Please try again." };
+  if (!dbForm || !dbForm.active || !formComponents[INITIAL_FORM_KEY]) {
+    return { error: "The audit form is currently unavailable. Please try again later." };
   }
 
-  // 2. Store the verified form details in Redis
-  const token = crypto.randomUUID();
-  const pending: PendingClient = {
-    name,
-    email,
-    message,
-    formId: dbForm.id,
-    formKey: dbForm.key,
-    formTitle: dbForm.title,
-  };
+  // 2. Persist the assignment via Postgres
+  let assignment;
+  try {
+    assignment = await createFormAssignment({
+      formKey: INITIAL_FORM_KEY,
+      email,
+      name,
+      message,
+    });
+  } catch (err) {
+    console.error("Failed to create form assignment:", err);
+    return { error: "Unable to process your request. Please try again." };
+  }
 
-  await redis.set(`client:${token}`, pending, { ex: TTL_SECONDS });
+  const url = `${process.env.NEXT_PUBLIC_APP_URL}/client/form/${assignment.token}`;
 
-  const url = `${process.env.NEXT_PUBLIC_APP_URL}/client/form/${token}`;
-
+  // 3. Dispatch invitation email
   try {
     await sendEmail({
       to: email,
