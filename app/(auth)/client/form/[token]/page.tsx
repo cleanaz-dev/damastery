@@ -1,36 +1,40 @@
-import { PendingClient } from "@/lib/actions/first-time-contact";
+import { getValidAssignmentByToken } from "@/lib/forms/assignments";
 import { formComponents } from "@/lib/forms/registry";
 import { isRegistered } from "@/lib/auth-guard";
-import { prisma } from "@/lib/prisma";
-import { redis } from "@/lib/redis";
 import { notFound } from "next/navigation";
 
-export default async function Page({ params }: { params: Promise<{ token: string }> }) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ token: string }>;
+}) {
   const { token } = await params;
 
-  // 1. Fetch pending invite from Redis first
-  const pending = await redis.get<PendingClient>(`client:${token}`);
-  if (!pending) notFound();
+  // 1. Fetch & validate assignment via DB helper
+  const assignment = await getValidAssignmentByToken(token);
+  if (!assignment) notFound();
 
-  // 2. Verify the form is still active in Postgres and has a mapped React component
-  const dbForm = await prisma.form.findUnique({
-    where: { key: pending.formKey },
-    select: { id: true, active: true, key: true },
-  });
+  // 2. Verify component exists in your frontend code map
+  const FormComponent = formComponents[assignment.form.key];
+  if (!FormComponent) notFound();
 
-  const FormComponent = formComponents[pending.formKey];
-
-  if (!dbForm || !dbForm.active || !FormComponent) {
-    notFound();
-  }
-
-  // 3. Only force registration once we know the token & form are 100% valid
+  // 3. User must be registered/authenticated to submit
   await isRegistered(undefined, `/register?token=${token}`);
 
   return (
     <div className="min-h-screen bg-[#F6F5F2] selection:bg-slate-200">
       <main className="mx-auto max-w-3xl px-6 py-16 md:py-24 font-sans text-slate-900">
-        <FormComponent token={token} defaults={pending} />
+        <FormComponent
+          token={token}
+          defaults={{
+            name: assignment.name ?? "",
+            email: assignment.email,
+            message: assignment.message ?? "",
+            formId: assignment.formId, 
+            formKey: assignment.form.key,
+            formTitle: assignment.form.title,
+          }}
+        />
       </main>
     </div>
   );

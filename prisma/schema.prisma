@@ -57,8 +57,9 @@ model ClientProfile {
 
   submissions FormSubmission[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  formAssignments FormAssignment[]
 }
 
 model Session {
@@ -130,22 +131,6 @@ model Booking {
   adminNote String? // For your admin blocks
 }
 
-model FormSubmission {
-  id        String        @id @default(cuid())
-  profileId String
-  profile   ClientProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-
-  formSlug String // e.g. "intake"
-  data     Json
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  form      Form?    @relation(fields: [formId], references: [id])
-  formId    String?
-
-  @@index([profileId])
-}
-
 model Form {
   id          String           @id @default(cuid())
   key         String           @unique
@@ -153,8 +138,63 @@ model Form {
   active      Boolean          @default(true)
   submissions FormSubmission[]
 
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  formAssignments FormAssignment[]
+}
+
+enum FormStatus {
+  PENDING // Sent or assigned, waiting on client
+  COMPLETED // Submitted
+  EXPIRED // Optional: if you want to explicitly mark expired invites
+}
+
+model FormAssignment {
+  id     String     @id @default(cuid())
+  token  String     @unique @default(cuid()) // Replaces your Redis UUID!
+  status FormStatus @default(PENDING)
+
+  // Pre-registration info (from firstContactAction)
+  email   String
+  name    String?
+  message String?
+
+  // Linked Form (Required)
+  formId String
+  form   Form   @relation(fields: [formId], references: [id])
+
+  // Linked ClientProfile (Optional at first! Attached once they register/submit)
+  profileId String?
+  profile   ClientProfile? @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  // Resulting submission (1-to-1 when completed)
+  submission FormSubmission?
+
+  expiresAt DateTime // e.g., now() + 7 days
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([profileId])
+}
+
+model FormSubmission {
+  id           String         @id @default(cuid())
+  assignmentId String         @unique
+  assignment   FormAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  profileId String
+  profile   ClientProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  formId   String
+  form     Form   @relation(fields: [formId], references: [id])
+  formSlug String
+  data     Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([profileId])
 }
 
 model ZoomConnection {

@@ -4,7 +4,6 @@
 import { useMemo, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
-import { submitIntake } from "@/lib/actions/intake-form";
 import type { FormProps } from "@/lib/forms/registry";
 import { AckField } from "../parts/ack-field";
 import { ChoiceField } from "../parts/choice-field";
@@ -14,6 +13,7 @@ import { FormSection } from "../parts/form-section";
 import { LikertQuestion } from "../parts/likert-question";
 import { TextAreaField } from "../parts/text-area-field";
 import { TextListField } from "../parts/text-list-field";
+import { submitBaselineAuditForm } from "@/lib/actions/submit/baseline-audit-form";
 
 export const SECTIONS = [
   {
@@ -134,7 +134,7 @@ export function BaseLineAudit({ token, defaults }: FormProps) {
           open: { reach: reach.filter(Boolean), story, first, want },
           fit: { support, heavy, ack },
         };
-        await submitIntake(token, payload);
+        await submitBaselineAuditForm(token, payload);
         console.log("submit intake", token, payload);
       } catch {
         setError("Something went wrong. Please try again.");

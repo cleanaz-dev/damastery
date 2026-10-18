@@ -1,4 +1,4 @@
-import { BaseLineAudit } from "@/components/forms/template/base-line-audit";
+import { BaseLineAudit } from "@/components/forms/template/baseline-audit";
 import { IntakeForm } from "@/components/forms/template/intake-form";
 import { PendingClient } from "@/lib/actions/first-time-contact";
 import { ComponentType } from "react";
