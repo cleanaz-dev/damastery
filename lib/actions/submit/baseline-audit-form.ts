@@ -113,7 +113,7 @@ export async function submitBaselineAuditForm(
     const webhookUrl = getWebhookUrl(task.id);
 
     const command = createCommand({
-      functionName: "damastery-check-form",
+      functionName: "damastery-form-check",
       invocationType: "Event", // Async Lambda execution
       payload: {
         data: parsed.data.open,
