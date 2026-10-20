@@ -1,7 +1,7 @@
 // components/client-table.tsx (or alongside your page)
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useTransition } from "react";
 import {
   flexRender,
   useTable,
@@ -16,7 +16,11 @@ import {
   sortFns,
 } from "@tanstack/react-table";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
-import { ClientWithRelations } from "@/lib/actions/get-clients";
+import type {
+  ClientWithRelations,
+  AssignableForm,
+} from "@/lib/actions/get-clients";
+import { assignFormToClient } from "@/lib/actions/assign-form";
 import {
   ArrowUpDown,
   ChevronLeft,
@@ -25,11 +29,11 @@ import {
   CheckCircle2,
   XCircle,
   Calendar,
-  FileText,
 } from "lucide-react";
 
 interface ClientTableProps {
   data: ClientWithRelations[];
+  forms: AssignableForm[];
 }
 
 const features = tableFeatures({
@@ -43,7 +47,107 @@ const features = tableFeatures({
   sortFns,
 });
 
-export function ClientTable({ data }: ClientTableProps) {
+// ---------- Assigned forms badges ----------
+function AssignedForms({ client }: { client: ClientWithRelations }) {
+  const assignments = [
+    ...(client.profile?.assignments ?? []),
+    ...client.unlinkedAssignments,
+  ];
+
+  if (assignments.length === 0) {
+    return <span className="text-xs text-gray-400">None assigned</span>;
+  }
+
+  const now = new Date();
+
+  return (
+    <div className="flex flex-wrap gap-1.5 max-w-xs">
+      {assignments.map((a) => {
+        const expired =
+          a.status === "EXPIRED" ||
+          (a.status === "PENDING" && new Date(a.expiresAt) < now);
+
+        let label = "Pending";
+        let classes =
+          "bg-amber-50 text-amber-700 ring-amber-600/20";
+        if (a.status === "COMPLETED") {
+          label = "Done";
+          classes = "bg-emerald-50 text-emerald-700 ring-emerald-600/20";
+        } else if (expired) {
+          label = "Expired";
+          classes = "bg-gray-100 text-gray-600 ring-gray-500/20";
+        }
+
+        return (
+          <span
+            key={a.id}
+            className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${classes}`}
+            title={`${a.form.title} — ${label}`}
+          >
+            {a.form.title}
+            <span className="opacity-70">· {label}</span>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+// ---------- Assign form dropdown + button ----------
+function AssignFormControl({
+  userId,
+  forms,
+}: {
+  userId: string;
+  forms: AssignableForm[];
+}) {
+  const [formId, setFormId] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  function handleAssign() {
+    if (!formId) return;
+    setError(null);
+    startTransition(async () => {
+      const result = await assignFormToClient({ userId, formId });
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      setFormId("");
+    });
+  }
+
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-2">
+        <select
+          value={formId}
+          onChange={(e) => setFormId(e.target.value)}
+          disabled={isPending}
+          className="rounded-md border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        >
+          <option value="">Select form…</option>
+          {forms.map((f) => (
+            <option key={f.id} value={f.id}>
+              {f.title}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={handleAssign}
+          disabled={!formId || isPending}
+          className="rounded-md bg-blue-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {isPending ? "Assigning…" : "Assign"}
+        </button>
+      </div>
+      {error && <span className="text-xs text-red-600">{error}</span>}
+    </div>
+  );
+}
+
+export function ClientTable({ data, forms }: ClientTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
 
@@ -135,29 +239,16 @@ export function ClientTable({ data }: ClientTableProps) {
         },
       },
       {
-        id: "intakeStatus",
-        header: "Forms / Profile",
-        cell: ({ row }) => {
-          const profile = row.original.profile;
-          const submissionCount = profile?.submissions?.length ?? 0;
-
-          if (!profile) {
-            return (
-              <span className="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
-                No Profile
-              </span>
-            );
-          }
-
-          return (
-            <div className="flex items-center gap-1.5 text-sm text-gray-700">
-              <FileText className="h-4 w-4 text-gray-400" />
-              <span>
-                {submissionCount} {submissionCount === 1 ? "form" : "forms"}
-              </span>
-            </div>
-          );
-        },
+        id: "assignedForms",
+        header: "Forms",
+        cell: ({ row }) => <AssignedForms client={row.original} />,
+      },
+      {
+        id: "assignForm",
+        header: "Assign form",
+        cell: ({ row }) => (
+          <AssignFormControl userId={row.original.id} forms={forms} />
+        ),
       },
       {
         id: "status",
@@ -211,7 +302,7 @@ export function ClientTable({ data }: ClientTableProps) {
         },
       },
     ],
-    [],
+    [forms],
   );
 
   const table = useTable({
@@ -289,10 +380,7 @@ export function ClientTable({ data }: ClientTableProps) {
                     className="hover:bg-gray-50/80 transition-colors"
                   >
                     {row.getAllCells().map((cell) => (
-                      <td
-                        key={cell.id}
-                        className="px-4 py-3.5 whitespace-nowrap"
-                      >
+                      <td key={cell.id} className="px-4 py-3.5 align-top">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext(),

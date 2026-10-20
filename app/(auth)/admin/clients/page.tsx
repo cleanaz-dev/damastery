@@ -5,7 +5,7 @@ import { ClientTable } from "@/components/client/client-table";
 export const dynamic = "force-dynamic";
 
 export default async function ClientDashboardPage() {
-  const { clients, stats } = await getClientsDashboard();
+  const { clients, stats, forms } = await getClientsDashboard();
 
   return (
     <div className="mx-auto max-w-[1440px] w-full space-y-6 p-6">
@@ -65,7 +65,7 @@ export default async function ClientDashboardPage() {
       </div>
 
       {/* TanStack Table */}
-      <ClientTable data={clients} />
+      <ClientTable data={clients} forms={forms}  />
     </div>
   );
 }
