@@ -47,7 +47,7 @@ export default function ClientDashboardView({
   // NOTE: this assumes submission.formSlug holds the form key
   // (e.g. "intake-form"). If it doesn't, use submission.form.key instead.
   const missingForms = getMissingRequiredForms(
-    completedSubmissions.map((s) => s.formSlug),
+    completedSubmissions.map((s) => s.form?.key ?? s.formSlug),
   );
   const bookingLocked = missingForms.length > 0;
 
