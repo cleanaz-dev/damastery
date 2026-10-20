@@ -2,6 +2,7 @@
 import { Space_Grotesk } from "next/font/google";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { requireAdmin } from "@/lib/auth-guard";
 
 const adminFont = Space_Grotesk({
   subsets: ["latin"],
@@ -14,6 +15,9 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+
+  await requireAdmin()
+  
   return (
     <div className={`${adminFont.variable} font-[family-name:var(--font-admin)]`}>
       <SidebarProvider>
