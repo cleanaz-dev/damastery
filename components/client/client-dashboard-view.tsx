@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ClientData } from "@/lib/actions/get-client-data";
-import { getMissingRequiredForms } from "@/lib/required-forms";
+import { getMissingRequiredForms } from "@/lib/forms/required-forms";
 import {
   CheckCircle2,
   CircleDashed,
