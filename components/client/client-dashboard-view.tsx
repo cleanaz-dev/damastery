@@ -4,7 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ClientData } from "@/lib/actions/get-client-data";
-import { CheckCircle2, CircleDashed, ArrowRight } from "lucide-react";
+import { getMissingRequiredForms } from "@/lib/required-forms";
+import {
+  CheckCircle2,
+  CircleDashed,
+  ArrowRight,
+  Lock,
+} from "lucide-react";
 import { Reveal } from "../misc/reveal";
 import { authClient } from "@/lib/auth-client";
 
@@ -36,6 +42,35 @@ export default function ClientDashboardView({
   const firstName = data.name.split(" ")[0];
   const pendingAssignments = data.profile?.assignments ?? [];
   const completedSubmissions = data.profile?.submissions ?? [];
+
+  // Booking is locked until all required forms are submitted.
+  // NOTE: this assumes submission.formSlug holds the form key
+  // (e.g. "intake-form"). If it doesn't, use submission.form.key instead.
+  const missingForms = getMissingRequiredForms(
+    completedSubmissions.map((s) => s.formSlug),
+  );
+  const bookingLocked = missingForms.length > 0;
+
+  const bookingBlock = bookingLocked ? (
+    <div className="rounded-lg border border-stone-300 bg-stone-100/60 p-5 space-y-3">
+      <div className="flex items-center gap-2 text-stone-900">
+        <Lock className="w-4 h-4" strokeWidth={1.5} />
+        <p className="text-sm font-medium">
+          Complete your forms to book a session
+        </p>
+      </div>
+      <ul className="space-y-1 text-sm text-stone-500 italic">
+        {missingForms.map((f) => (
+          <li key={f.key} className="flex items-center gap-2">
+            <CircleDashed className="w-4 h-4" strokeWidth={1} />
+            {f.label}
+          </li>
+        ))}
+      </ul>
+    </div>
+  ) : (
+    bookingAction
+  );
 
   return (
     <div className="min-h-screen max-w-5xl mx-auto bg-stone-200 text-stone-800 font-sans selection:bg-stone-400">
@@ -111,14 +146,14 @@ export default function ClientDashboardView({
                         </button>
                       </div>
                     ))}
-                    <div className="pt-4">{bookingAction}</div>
+                    <div className="pt-4">{bookingBlock}</div>
                   </>
                 ) : (
                   <div className="py-4">
                     <p className="text-stone-500 italic">
                       You currently have no upcoming sessions.
                     </p>
-                    <div className="mt-4">{bookingAction}</div>
+                    <div className="mt-4">{bookingBlock}</div>
                   </div>
                 )}
               </div>
