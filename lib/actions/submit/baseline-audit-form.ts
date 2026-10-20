@@ -11,10 +11,10 @@ import {
   completeFormAssignment,
   createFormAssignment,
 } from "@/lib/forms/assignments";
-import { createCommand, lambda } from "@/lib/aws"; // ensure your lambda client is exported
+import { createCommand, lambda } from "@/lib/aws";
 import { getWebhookUrl } from "@/lib/api";
 
-const NEXT_FORM_KEY = "intake-form";
+const NEXT_FORM_KEYS = ["intake-form", "coaching-agreement"];
 
 const schema = z.object({
   answers: z
@@ -62,8 +62,11 @@ export async function submitBaselineAuditForm(
     return { error: "This link is invalid, already completed, or has expired." };
   }
 
+  const userId = session.user.id;
+  const userEmail = session.user.email;
+
   // Guard against mismatched accounts
-  if (session.user.email.toLowerCase() !== assignment.email.toLowerCase()) {
+  if (userEmail.toLowerCase() !== assignment.email.toLowerCase()) {
     return {
       error: `This form was assigned to ${assignment.email}. Please switch accounts to continue.`,
     };
@@ -71,8 +74,8 @@ export async function submitBaselineAuditForm(
 
   // 3. Ensure client profile exists
   const profile = await prisma.clientProfile.upsert({
-    where: { userId: session.user.id },
-    create: { userId: session.user.id },
+    where: { userId },
+    create: { userId },
     update: {},
   });
 
@@ -83,18 +86,26 @@ export async function submitBaselineAuditForm(
     data: parsed.data,
   });
 
-  // 5. Automatically create/assign the NEXT form ("intake-form") for their dashboard
-  let nextAssignment;
-  try {
-    nextAssignment = await createFormAssignment({
-      formKey: NEXT_FORM_KEY,
-      email: session.user.email,
-      name: session.user.name ?? assignment.name ?? undefined,
-      profileId: profile.id,
-    });
-  } catch (err) {
-    console.error("Failed to automatically assign next form:", err);
-  }
+  // 5. Automatically assign the NEXT forms for their dashboard
+  const nextResults = await Promise.allSettled(
+    NEXT_FORM_KEYS.map((formKey) =>
+      createFormAssignment({
+        formKey,
+        email: userEmail,
+        name: session.user.name ?? assignment.name ?? undefined,
+        profileId: profile.id,
+      })
+    )
+  );
+
+  nextResults.forEach((result, i) => {
+    if (result.status === "rejected") {
+      console.error(
+        `Failed to assign next form "${NEXT_FORM_KEYS[i]}":`,
+        result.reason
+      );
+    }
+  });
 
   // 6. Record System Task & invoke Lambda asynchronously (Fire-and-Forget)
   try {
@@ -102,10 +113,9 @@ export async function submitBaselineAuditForm(
       data: {
         metadata: {
           token,
-          userId: session.user.id,
+          userId,
           profileId: profile.id,
           submissionId: submission.id,
-          nextAssignmentId: nextAssignment?.id,
         },
       },
     });
@@ -114,7 +124,7 @@ export async function submitBaselineAuditForm(
 
     const command = createCommand({
       functionName: "damastery-form-check",
-      invocationType: "Event", // Async Lambda execution
+      invocationType: "Event",
       payload: {
         data: parsed.data.open,
         webhookUrl,
@@ -123,7 +133,6 @@ export async function submitBaselineAuditForm(
       },
     });
 
-    // Actually send the command to AWS
     await lambda.send(command);
   } catch (err) {
     console.error("Failed to enqueue Lambda check:", err);
@@ -139,7 +148,7 @@ export async function submitBaselineAuditForm(
 
   try {
     await sendEmail({
-      to: session.user.email,
+      to: userEmail,
       from: process.env.EMAIL_FROM as string,
       subject: "Thank You!",
       react: CompleteFormEmail({
